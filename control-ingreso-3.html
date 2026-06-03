@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Control de Ingreso — Salón de Acondicionamiento</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --accent: #f0a500;
+    --accent2: #e05c00;
+    --green: #2ea043;
+    --red: #da3633;
+    --blue: #388bfd;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    flex: 1;
+  }
+  header h1 span { color: var(--accent); display: block; font-size: 0.75rem; font-weight: 400; letter-spacing: 0.1em; color: var(--muted); }
+
+  .sync-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.7rem;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .sync-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+  .sync-dot.ok { background: var(--green); }
+  .sync-dot.error { background: var(--red); }
+  .sync-dot.syncing { background: var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex: 1;
+    padding: 13px 10px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .page { display: none; padding: 20px; }
+  .page.active { display: block; }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  input, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 1rem;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  select option { background: var(--surface); }
+
+  .scan-row { display: flex; gap: 10px; }
+  .scan-row input { flex: 1; }
+
+  .btn-scan {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 7px;
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+  .btn-scan:active { opacity: 0.8; }
+
+  .destino-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .destino-btn {
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 18px 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .destino-btn .icon { font-size: 2rem; }
+  .destino-btn.selected-salon { background: rgba(56,139,253,0.12); border-color: var(--blue); color: var(--blue); }
+  .destino-btn.selected-deposito { background: rgba(46,160,67,0.12); border-color: var(--green); color: var(--green); }
+
+  .cueros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .cuero-field {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .cuero-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: 0.05em; }
+  .cuero-label.a { color: var(--accent); }
+  .cuero-label.b { color: var(--blue); }
+  .cuero-field input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--border);
+    border-radius: 0;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    padding: 4px 0;
+    width: 100%;
+  }
+  .cuero-field input:focus { border-bottom-color: var(--accent); }
+  .cuero-field small { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: var(--radius);
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 18px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 8px;
+  }
+  .btn-submit:active { opacity: 0.85; transform: scale(0.98); }
+  .btn-submit:disabled { opacity: 0.5; }
+
+  /* CONFIG PANEL */
+  .config-banner {
+    background: rgba(240,165,0,0.1);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .config-banner .icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+  .config-banner p { font-size: 0.82rem; color: var(--text); line-height: 1.5; }
+  .config-banner a { color: var(--accent); text-decoration: underline; }
+
+  .webhook-row { display: flex; gap: 8px; align-items: flex-end; }
+  .webhook-row .field { flex: 1; margin: 0; }
+  .btn-save-webhook {
+    background: var(--green);
+    border: none;
+    border-radius: 7px;
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 11px 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* PENDING QUEUE */
+  .pending-banner {
+    background: rgba(218,54,51,0.1);
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .pending-banner span { font-size: 0.82rem; color: var(--text); }
+  .btn-retry {
+    background: var(--red);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* SCANNER MODAL */
+  #scanner-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 999;
+    flex-direction: column;
+  }
+  #scanner-modal.open { display: flex; }
+
+  .scanner-header {
+    background: rgba(0,0,0,0.7);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+  }
+  .scanner-header span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+  .btn-close-scan {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    font-size: 1.4rem;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  #scanner-viewport {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  #scanner-viewport video,
+  #scanner-viewport canvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+
+  .scan-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .scan-frame {
+    width: min(80vw, 320px);
+    height: 140px;
+    border: 3px solid var(--accent);
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+    position: relative;
+  }
+  .scan-line {
+    position: absolute;
+    left: 8px; right: 8px;
+    top: 50%;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0.8;
+    animation: scanline 1.8s ease-in-out infinite;
+  }
+  @keyframes scanline {
+    0%, 100% { top: 20%; opacity: 1; }
+    50% { top: 80%; opacity: 0.5; }
+  }
+  .scan-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 0; right: 0;
+    text-align: center;
+    color: #fff;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  .scan-success-flash {
+    position: fixed;
+    inset: 0;
+    background: rgba(46, 160, 67, 0.4);
+    z-index: 1000;
+    display: none;
+    animation: flash 0.4s ease;
+    pointer-events: none;
+  }
+  @keyframes flash { 0%{opacity:1} 100%{opacity:0} }
+
+  /* RECORDS */
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar { display: none; }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 7px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+  .record-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .record-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .record-card.salon::before { background: var(--blue); }
+  .record-card.deposito::before { background: var(--green); }
+  .record-card.pending::after {
+    content: '⏳ Pendiente';
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(218,54,51,0.15);
+    color: var(--red);
+    font-size: 0.65rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 3px 8px;
+    border-radius: 10px;
+  }
+
+  .record-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+  .record-partida { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.3rem; color: var(--accent); }
+  .record-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .record-badge.salon { background: rgba(56,139,253,0.15); color: var(--blue); }
+  .record-badge.deposito { background: rgba(46,160,67,0.15); color: var(--green); }
+  .record-names { font-size: 0.85rem; color: var(--text); margin-bottom: 8px; }
+  .record-names span { color: var(--muted); font-size: 0.78rem; }
+  .record-cueros { display: flex; gap: 12px; margin-bottom: 6px; }
+  .cuero-chip { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.9rem; padding: 4px 12px; border-radius: 6px; }
+  .cuero-chip.a { background: rgba(240,165,0,0.15); color: var(--accent); }
+  .cuero-chip.b { background: rgba(56,139,253,0.15); color: var(--blue); }
+  .record-time { font-size: 0.72rem; color: var(--muted); }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+  .stat-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2.2rem; line-height: 1; margin-bottom: 4px; }
+  .stat-num.accent { color: var(--accent); }
+  .stat-num.blue { color: var(--blue); }
+  .stat-num.green { color: var(--green); }
+  .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* EDIT MODAL */
+  #edit-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  #edit-modal.open { display: flex; }
+
+  .edit-sheet {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px 18px 0 0;
+    padding: 24px 20px 36px;
+    width: 100%;
+    max-height: 90dvh;
+    overflow-y: auto;
+    animation: slideup 0.25s ease;
+  }
+  @keyframes slideup { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  .edit-sheet h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .btn-close-edit {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--muted);
+    width: 32px; height: 32px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .edit-cueros { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+
+  .btn-save-edit {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: var(--radius);
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 16px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+
+  .btn-edit {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 5px 12px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--green);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    padding: 14px 28px;
+    border-radius: 30px;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 90vw;
+    text-align: center;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.error { background: var(--red); }
+  #toast.warn { background: #7d5c00; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🏭</div>
+  <h1>Control de Ingreso<span>Salón de Acondicionamiento</span></h1>
+  <div class="sync-status">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">—</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showPage('form', this)">📋 Nuevo</button>
+  <button class="tab" onclick="showPage('registros', this)">📂 Registros</button>
+  <button class="tab" onclick="showPage('stats', this)">📊 Estadísticas</button>
+  <button class="tab" onclick="showPage('config', this)">⚙️ Config</button>
+</div>
+
+<!-- FORMULARIO -->
+<div class="page active" id="page-form">
+  <div id="pending-banner" style="display:none" class="pending-banner">
+    <span id="pending-text"></span>
+    <button class="btn-retry" onclick="retryPending()">↻ Reintentar</button>
+  </div>
+
+  <div class="section-title">🔍 Identificación</div>
+  <div class="card">
+    <div class="field">
+      <label>N° de Partida</label>
+      <div class="scan-row">
+        <input type="text" id="partida" placeholder="Escanear o ingresar..." autocomplete="off">
+        <button class="btn-scan" onclick="openScanner()">📷 Escanear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">👤 Personas</div>
+  <div class="card">
+    <div class="field">
+      <label>Persona que Ingresa</label>
+      <input type="text" id="persona-ingresa" placeholder="Nombre completo..." autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Persona que Recibe</label>
+      <input type="text" id="persona-recibe" placeholder="Nombre completo..." autocomplete="off">
+    </div>
+  </div>
+
+  <div class="section-title">🐄 Cueros</div>
+  <div class="card">
+    <div class="cueros-grid">
+      <div class="cuero-field">
+        <div class="cuero-label a">CLASIFICACIÓN A</div>
+        <input type="number" id="cueros-a" min="0" value="0" inputmode="numeric">
+        <small>Cantidad de cueros</small>
+      </div>
+      <div class="cuero-field">
+        <div class="cuero-label b">CLASIFICACIÓN B</div>
+        <input type="number" id="cueros-b" min="0" value="0" inputmode="numeric">
+        <small>Cantidad de cueros</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">🏠 Destino</div>
+  <div class="card">
+    <div class="destino-row">
+      <button class="destino-btn" id="btn-salon" onclick="selectDestino('salon')">
+        <span class="icon">🛍️</span>Salón de Ventas
+      </button>
+      <button class="destino-btn" id="btn-deposito" onclick="selectDestino('deposito')">
+        <span class="icon">📦</span>Depósito de Ventas
+      </button>
+    </div>
+  </div>
+
+  <button class="btn-submit" id="btn-submit" onclick="submitForm()">✅ Registrar Ingreso</button>
+</div>
+
+<!-- REGISTROS -->
+<div class="page" id="page-registros">
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterRecords('todos', this)">Todos</button>
+    <button class="filter-btn" onclick="filterRecords('salon', this)">Salón Ventas</button>
+    <button class="filter-btn" onclick="filterRecords('deposito', this)">Depósito</button>
+    <button class="filter-btn" onclick="filterRecords('pending', this)">⏳ Pendientes</button>
+  </div>
+  <div id="records-list"></div>
+</div>
+
+<!-- ESTADÍSTICAS -->
+<div class="page" id="page-stats">
+  <div class="section-title">📊 Resumen General</div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="section-title">📅 Últimas Partidas</div>
+  <div id="stats-partidas"></div>
+</div>
+
+<!-- CONFIGURACIÓN -->
+<div class="page" id="page-config">
+  <div class="section-title">🔗 Google Sheets</div>
+
+  <div class="config-banner">
+    <div class="icon">ℹ️</div>
+    <p>
+      Para sincronizar con Google Sheets necesitás crear un <strong>Google Apps Script</strong> como intermediario.<br><br>
+      <strong>Pasos:</strong><br>
+      1. Abrí tu planilla: <a href="https://docs.google.com/spreadsheets/d/1dQ8zZjm0tvG6GONfNFNs_uHuT_Re-wPAUC7FWXrBcgY" target="_blank">Control de Ingreso ↗</a><br>
+      2. Andá a <strong>Extensiones → Apps Script</strong><br>
+      3. Copiá y pegá el código que está abajo<br>
+      4. Hacé clic en <strong>Implementar → Nueva implementación → Aplicación web</strong><br>
+      5. Permiso: "Cualquier usuario". Copiá la URL y pegala abajo.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <label>Código para Apps Script</label>
+      <textarea id="apps-script-code" readonly style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:monospace;font-size:0.72rem;padding:12px;min-height:180px;resize:none;outline:none;line-height:1.5"></textarea>
+    </div>
+    <button onclick="copyScript()" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;padding:10px 18px;cursor:pointer;width:100%;">📋 Copiar Código</button>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <label>URL del Web App (Apps Script)</label>
+      <div class="webhook-row">
+        <div class="field">
+          <input type="url" id="webhook-url" placeholder="https://script.google.com/macros/s/..." autocomplete="off">
+        </div>
+        <button class="btn-save-webhook" onclick="saveWebhook()">💾 Guardar</button>
+      </div>
+    </div>
+    <div id="webhook-test-result" style="margin-top:10px;font-size:0.8rem;color:var(--muted);display:none"></div>
+  </div>
+
+  <div class="card">
+    <div style="font-size:0.82rem;color:var(--muted);line-height:1.6">
+      <strong style="color:var(--text)">Estado de sincronización</strong><br>
+      Registros locales: <span id="cfg-local-count" style="color:var(--accent)">0</span><br>
+      Registros pendientes: <span id="cfg-pending-count" style="color:var(--red)">0</span><br>
+      Webhook configurado: <span id="cfg-webhook-status">No</span>
+    </div>
+    <button onclick="testWebhook()" style="margin-top:12px;background:var(--blue);border:none;border-radius:7px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.85rem;padding:10px 18px;cursor:pointer;width:100%;">🧪 Probar Conexión</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal">
+  <div class="edit-sheet">
+    <h2>✏️ Editar Registro <button class="btn-close-edit" onclick="closeEdit()">✕</button></h2>
+    <input type="hidden" id="edit-id">
+    <div class="field">
+      <label>N° de Partida</label>
+      <input type="text" id="edit-partida" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Persona que Ingresa</label>
+      <input type="text" id="edit-ingresa" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Persona que Recibe</label>
+      <input type="text" id="edit-recibe" autocomplete="off">
+    </div>
+    <div class="edit-cueros">
+      <div class="field" style="margin:0">
+        <label style="color:var(--accent)">Cueros Clase A</label>
+        <input type="number" id="edit-cueros-a" min="0" inputmode="numeric">
+      </div>
+      <div class="field" style="margin:0">
+        <label style="color:var(--blue)">Cueros Clase B</label>
+        <input type="number" id="edit-cueros-b" min="0" inputmode="numeric">
+      </div>
+    </div>
+    <div class="field">
+      <label>Destino</label>
+      <select id="edit-destino">
+        <option value="salon">Salón de Ventas</option>
+        <option value="deposito">Depósito de Ventas</option>
+      </select>
+    </div>
+    <button class="btn-save-edit" onclick="saveEdit()">💾 Guardar Cambios</button>
+  </div>
+</div>
+
+<!-- SCANNER -->
+<div id="scanner-modal">
+  <div class="scanner-header">
+    <span>📷 Escanear Código de Barras</span>
+    <button class="btn-close-scan" onclick="closeScanner()">✕</button>
+  </div>
+  <div id="scanner-viewport">
+    <div class="scan-overlay">
+      <div class="scan-frame"><div class="scan-line"></div></div>
+    </div>
+    <p class="scan-hint">Apuntá la cámara al código de barras</p>
+  </div>
+</div>
+
+<div class="scan-success-flash" id="scan-flash"></div>
+<div id="toast"></div>
+
+<script>
+// =====================
+// ESTADO
+// =====================
+let records = JSON.parse(localStorage.getItem('ingresos_v2') || '[]');
+let pendingQueue = JSON.parse(localStorage.getItem('ingresos_pending') || '[]');
+let destinoSelected = null;
+let scannerActive = false;
+let webhookUrl = localStorage.getItem('webhook_url') || '';
+
+// Apps Script code para mostrar al usuario
+const APPS_SCRIPT_CODE = `function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.openById('1dQ8zZjm0tvG6GONfNFNs_uHuT_Re-wPAUC7FWXrBcgY').getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    
+    // Agregar encabezados si la hoja está vacía
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(['ID','Fecha','Hora','N° Partida','Persona que Ingresa',
+        'Persona que Recibe','Cueros Clase A','Cueros Clase B','Total Cueros','Destino']);
+      sheet.getRange(1,1,1,10).setFontWeight('bold').setBackground('#f0a500');
+    }
+    
+    var d = new Date(data.fecha);
+    var fecha = Utilities.formatDate(d, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+    var hora  = Utilities.formatDate(d, Session.getScriptTimeZone(), 'HH:mm:ss');
+    
+    sheet.appendRow([
+      data.id, fecha, hora, data.partida,
+      data.ingresa, data.recibe,
+      data.cuerosA, data.cuerosB,
+      data.cuerosA + data.cuerosB,
+      data.destino === 'salon' ? 'Salón de Ventas' : 'Depósito de Ventas'
+    ]);
+    
+    return ContentService.createTextOutput(JSON.stringify({ok:true}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ok:false, error:err.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({ok:true, msg:'Control de Ingreso API activa'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+document.getElementById('apps-script-code').value = APPS_SCRIPT_CODE;
+if (webhookUrl) document.getElementById('webhook-url').value = webhookUrl;
+
+// =====================
+// UI
+// =====================
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'registros') renderRecords('todos');
+  if (id === 'stats') renderStats();
+  if (id === 'config') renderConfig();
+}
+
+function selectDestino(dest) {
+  destinoSelected = dest;
+  document.getElementById('btn-salon').className = 'destino-btn' + (dest === 'salon' ? ' selected-salon' : '');
+  document.getElementById('btn-deposito').className = 'destino-btn' + (dest === 'deposito' ? ' selected-deposito' : '');
+}
+
+function showToast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (type === 'error' ? ' error' : type === 'warn' ? ' warn' : '');
+  setTimeout(() => t.className = '', 2800);
+}
+
+function updateSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if (state === 'ok')      { dot.className = 'sync-dot ok'; lbl.textContent = 'Sincronizado'; }
+  if (state === 'error')   { dot.className = 'sync-dot error'; lbl.textContent = 'Sin conexión'; }
+  if (state === 'syncing') { dot.className = 'sync-dot syncing'; lbl.textContent = 'Sincronizando...'; }
+  if (state === 'none')    { dot.className = 'sync-dot'; lbl.textContent = 'Sin config'; }
+}
+
+function updatePendingBanner() {
+  const banner = document.getElementById('pending-banner');
+  const txt = document.getElementById('pending-text');
+  if (pendingQueue.length > 0) {
+    banner.style.display = 'flex';
+    txt.textContent = `⚠️ ${pendingQueue.length} registro${pendingQueue.length > 1 ? 's' : ''} pendiente${pendingQueue.length > 1 ? 's' : ''} de sincronizar`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// =====================
+// SUBMIT
+// =====================
+async function submitForm() {
+  const partida = document.getElementById('partida').value.trim();
+  const ingresa = document.getElementById('persona-ingresa').value.trim();
+  const recibe  = document.getElementById('persona-recibe').value.trim();
+  const cuerosA = parseInt(document.getElementById('cueros-a').value) || 0;
+  const cuerosB = parseInt(document.getElementById('cueros-b').value) || 0;
+
+  if (!partida)          return showToast('⚠️ Ingresá el N° de Partida', 'error');
+  if (!ingresa)          return showToast('⚠️ Falta la persona que ingresa', 'error');
+  if (!recibe)           return showToast('⚠️ Falta la persona que recibe', 'error');
+  if (!destinoSelected)  return showToast('⚠️ Seleccioná el destino', 'error');
+  if (cuerosA + cuerosB === 0) return showToast('⚠️ Ingresá al menos 1 cuero', 'error');
+
+  const record = {
+    id: Date.now(),
+    partida, ingresa, recibe, cuerosA, cuerosB,
+    destino: destinoSelected,
+    fecha: new Date().toISOString(),
+    synced: false
+  };
+
+  records.unshift(record);
+  saveLocal();
+
+  // Reset form
+  document.getElementById('partida').value = '';
+  document.getElementById('persona-ingresa').value = '';
+  document.getElementById('persona-recibe').value = '';
+  document.getElementById('cueros-a').value = '0';
+  document.getElementById('cueros-b').value = '0';
+  destinoSelected = null;
+  document.getElementById('btn-salon').className = 'destino-btn';
+  document.getElementById('btn-deposito').className = 'destino-btn';
+
+  // Intentar enviar a Sheets
+  const sent = await sendToSheets(record);
+  if (sent) {
+    showToast('✅ Registrado y sincronizado con Sheets');
+    updateSyncStatus('ok');
+  } else {
+    pendingQueue.push(record);
+    savePending();
+    updatePendingBanner();
+    if (!webhookUrl) {
+      showToast('✅ Guardado localmente (configurá Sheets en ⚙️ Config)');
+    } else {
+      showToast('✅ Guardado. Se sincronizará cuando haya conexión', 'warn');
+      updateSyncStatus('error');
+    }
+  }
+}
+
+// =====================
+// GOOGLE SHEETS SYNC
+// =====================
+async function sendToSheets(record) {
+  if (!webhookUrl) return false;
+  try {
+    updateSyncStatus('syncing');
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(record)
+    });
+    const data = await res.json();
+    if (data.ok) {
+      // Marcar como sincronizado
+      const idx = records.findIndex(r => r.id === record.id);
+      if (idx !== -1) { records[idx].synced = true; saveLocal(); }
+      return true;
+    }
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function retryPending() {
+  if (!webhookUrl) {
+    showToast('⚠️ Configurá el webhook primero en ⚙️ Config', 'error');
+    return;
+  }
+  if (pendingQueue.length === 0) return;
+
+  showToast('↻ Reintentando sincronización...');
+  updateSyncStatus('syncing');
+
+  const stillPending = [];
+  for (const record of pendingQueue) {
+    const sent = await sendToSheets(record);
+    if (!sent) stillPending.push(record);
+  }
+
+  pendingQueue = stillPending;
+  savePending();
+  updatePendingBanner();
+
+  if (stillPending.length === 0) {
+    showToast('✅ Todos los registros sincronizados');
+    updateSyncStatus('ok');
+  } else {
+    showToast(`⚠️ ${stillPending.length} registro(s) aún pendientes`, 'warn');
+    updateSyncStatus('error');
+  }
+}
+
+// =====================
+// CONFIG
+// =====================
+function saveWebhook() {
+  const url = document.getElementById('webhook-url').value.trim();
+  if (!url) return showToast('⚠️ Ingresá la URL del Apps Script', 'error');
+  webhookUrl = url;
+  localStorage.setItem('webhook_url', url);
+  showToast('✅ URL guardada correctamente');
+  renderConfig();
+  if (pendingQueue.length > 0) retryPending();
+}
+
+async function testWebhook() {
+  const url = document.getElementById('webhook-url').value.trim();
+  if (!url) return showToast('⚠️ Ingresá la URL primero', 'error');
+  showToast('🧪 Probando conexión...');
+  updateSyncStatus('syncing');
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const el = document.getElementById('webhook-test-result');
+    el.style.display = 'block';
+    if (data.ok) {
+      el.style.color = 'var(--green)';
+      el.textContent = '✅ Conexión exitosa con Google Sheets';
+      updateSyncStatus('ok');
+      showToast('✅ Conexión exitosa');
+    } else {
+      throw new Error('Respuesta inesperada');
+    }
+  } catch(e) {
+    const el = document.getElementById('webhook-test-result');
+    el.style.display = 'block';
+    el.style.color = 'var(--red)';
+    el.textContent = '❌ No se pudo conectar. Verificá la URL y los permisos.';
+    updateSyncStatus('error');
+    showToast('❌ Error de conexión', 'error');
+  }
+}
+
+function copyScript() {
+  navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(() => {
+    showToast('📋 Código copiado al portapapeles');
+  }).catch(() => {
+    document.getElementById('apps-script-code').select();
+    document.execCommand('copy');
+    showToast('📋 Código copiado');
+  });
+}
+
+function renderConfig() {
+  document.getElementById('cfg-local-count').textContent = records.length;
+  document.getElementById('cfg-pending-count').textContent = pendingQueue.length;
+  const ws = document.getElementById('cfg-webhook-status');
+  if (webhookUrl) {
+    ws.textContent = '✅ Sí';
+    ws.style.color = 'var(--green)';
+  } else {
+    ws.textContent = '❌ No configurado';
+    ws.style.color = 'var(--red)';
+  }
+  updateSyncStatus(webhookUrl ? (pendingQueue.length > 0 ? 'error' : 'ok') : 'none');
+}
+
+// =====================
+// PERSISTENCIA
+// =====================
+function saveLocal() { localStorage.setItem('ingresos_v2', JSON.stringify(records)); }
+function savePending() { localStorage.setItem('ingresos_pending', JSON.stringify(pendingQueue)); }
+
+// =====================
+// RENDER RECORDS
+// =====================
+function renderRecords(filter) {
+  const list = document.getElementById('records-list');
+  let data = records;
+  if (filter === 'salon')    data = records.filter(r => r.destino === 'salon');
+  if (filter === 'deposito') data = records.filter(r => r.destino === 'deposito');
+  if (filter === 'pending')  data = records.filter(r => !r.synced);
+
+  if (data.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>No hay registros${filter !== 'todos' ? ' en esta categoría' : ' aún'}</p></div>`;
+    return;
+  }
+
+  list.innerHTML = data.map(r => {
+    const d = new Date(r.fecha);
+    const fecha = d.toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric'});
+    const hora  = d.toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+    const badge = r.destino === 'salon' ? 'Salón Ventas' : 'Depósito';
+    const pendingClass = !r.synced ? ' pending' : '';
+    return `
+      <div class="record-card ${r.destino}${pendingClass}">
+        <div class="record-top">
+          <div class="record-partida">PARTIDA #${r.partida}</div>
+          <div class="record-badge ${r.destino}">${badge}</div>
+        </div>
+        <div class="record-names">
+          <span>Ingresa:</span> ${r.ingresa} &nbsp;→&nbsp; <span>Recibe:</span> ${r.recibe}
+        </div>
+        <div class="record-cueros">
+          <div class="cuero-chip a">Clase A: ${r.cuerosA}</div>
+          <div class="cuero-chip b">Clase B: ${r.cuerosB}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="record-time">📅 ${fecha} &nbsp;🕐 ${hora} &nbsp;${r.synced ? '☁️ Sincronizado' : '⏳ Pendiente'}</div>
+          <button class="btn-edit" onclick="openEdit(${r.id})">✏️ Editar</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterRecords(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRecords(type);
+}
+
+// =====================
+// STATS
+// =====================
+function renderStats() {
+  const totalIngresos = records.length;
+  const totalA   = records.reduce((s, r) => s + (r.cuerosA||0), 0);
+  const totalB   = records.reduce((s, r) => s + (r.cuerosB||0), 0);
+  const salon    = records.filter(r => r.destino === 'salon').length;
+  const deposito = records.filter(r => r.destino === 'deposito').length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-num accent">${totalIngresos}</div><div class="stat-label">Total Ingresos</div></div>
+    <div class="stat-card"><div class="stat-num accent">${totalA+totalB}</div><div class="stat-label">Total Cueros</div></div>
+    <div class="stat-card"><div class="stat-num blue">${salon}</div><div class="stat-label">→ Salón Ventas</div></div>
+    <div class="stat-card"><div class="stat-num green">${deposito}</div><div class="stat-label">→ Depósito</div></div>
+    <div class="stat-card"><div class="stat-num accent">${totalA}</div><div class="stat-label">Cueros Clase A</div></div>
+    <div class="stat-card"><div class="stat-num blue">${totalB}</div><div class="stat-label">Cueros Clase B</div></div>
+  `;
+
+  const partidas = document.getElementById('stats-partidas');
+  if (!records.length) {
+    partidas.innerHTML = '<div class="empty-state"><div class="icon">📊</div><p>Sin datos aún</p></div>';
+    return;
+  }
+  partidas.innerHTML = records.slice(0,5).map(r => {
+    const d = new Date(r.fecha);
+    const fecha = d.toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit'});
+    return `
+      <div class="record-card ${r.destino}" style="padding:12px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="record-partida" style="font-size:1.1rem">Partida #${r.partida}</div>
+            <div style="font-size:0.8rem;color:var(--muted);margin-top:2px">${r.ingresa}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:0.85rem;color:var(--text)">A:${r.cuerosA} / B:${r.cuerosB}</div>
+            <div style="font-size:0.72rem;color:var(--muted)">${fecha} ${r.synced?'☁️':''}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// =====================
+// SCANNER
+// =====================
+function openScanner() {
+  document.getElementById('scanner-modal').classList.add('open');
+  scannerActive = true;
+
+  Quagga.init({
+    inputStream: {
+      name: "Live",
+      type: "LiveStream",
+      target: document.getElementById('scanner-viewport'),
+      constraints: { facingMode: "environment", width:{ideal:1280}, height:{ideal:720} }
+    },
+    locator: { patchSize: "medium", halfSample: true },
+    numOfWorkers: 2,
+    frequency: 10,
+    decoder: {
+      readers: ["code_128_reader","ean_reader","ean_8_reader","code_39_reader",
+                "codabar_reader","upc_reader","upc_e_reader","i2of5_reader"]
+    },
+    locate: true
+  }, function(err) {
+    if (err) {
+      closeScanner();
+      showToast('⚠️ No se pudo acceder a la cámara', 'error');
+      return;
+    }
+    Quagga.start();
+  });
+
+  let lastCode = null, lastTime = 0;
+  Quagga.onDetected(function(result) {
+    const code = result.codeResult.code;
+    const now = Date.now();
+    if (code === lastCode && now - lastTime < 2000) return;
+    lastCode = code; lastTime = now;
+
+    const flash = document.getElementById('scan-flash');
+    flash.style.display = 'block';
+    setTimeout(() => flash.style.display = 'none', 400);
+
+    document.getElementById('partida').value = code;
+    closeScanner();
+    showToast(`✅ Código leído: ${code}`);
+  });
+}
+
+function closeScanner() {
+  if (!scannerActive) return;
+  scannerActive = false;
+  try { Quagga.stop(); } catch(e) {}
+  document.getElementById('scanner-modal').classList.remove('open');
+}
+
+// =====================
+// EDITAR REGISTRO
+// =====================
+function openEdit(id) {
+  const r = records.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-partida').value = r.partida;
+  document.getElementById('edit-ingresa').value = r.ingresa;
+  document.getElementById('edit-recibe').value = r.recibe;
+  document.getElementById('edit-cueros-a').value = r.cuerosA;
+  document.getElementById('edit-cueros-b').value = r.cuerosB;
+  document.getElementById('edit-destino').value = r.destino;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEdit() {
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+async function saveEdit() {
+  const id = parseInt(document.getElementById('edit-id').value);
+  const idx = records.findIndex(r => r.id === id);
+  if (idx === -1) return;
+
+  const cuerosA = parseInt(document.getElementById('edit-cueros-a').value) || 0;
+  const cuerosB = parseInt(document.getElementById('edit-cueros-b').value) || 0;
+  if (cuerosA + cuerosB === 0) return showToast('⚠️ Ingresá al menos 1 cuero', 'error');
+
+  records[idx] = {
+    ...records[idx],
+    partida:  document.getElementById('edit-partida').value.trim(),
+    ingresa:  document.getElementById('edit-ingresa').value.trim(),
+    recibe:   document.getElementById('edit-recibe').value.trim(),
+    cuerosA, cuerosB,
+    destino:  document.getElementById('edit-destino').value,
+    synced:   false
+  };
+
+  saveLocal();
+  closeEdit();
+  renderRecords('todos');
+  document.querySelectorAll('.filter-btn').forEach((b,i) => i===0 ? b.classList.add('active') : b.classList.remove('active'));
+
+  // Re-sincronizar con Sheets
+  const sent = await sendToSheets(records[idx]);
+  if (sent) {
+    showToast('✅ Cambios guardados y sincronizados');
+    updateSyncStatus('ok');
+  } else {
+    pendingQueue = pendingQueue.filter(p => p.id !== id);
+    pendingQueue.push(records[idx]);
+    savePending();
+    updatePendingBanner();
+    showToast('✅ Cambios guardados. Se sincronizará luego', 'warn');
+  }
+}
+
+// =====================
+// INIT
+// =====================
+updatePendingBanner();
+updateSyncStatus(webhookUrl ? (pendingQueue.length > 0 ? 'error' : 'ok') : 'none');
+</script>
+</body>
+</html>
