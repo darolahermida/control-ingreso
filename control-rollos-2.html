@@ -32,31 +32,25 @@
     select option{background:var(--surface2)}
     input::placeholder{color:var(--muted)}
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-
-    /* TIPO SELECTOR */
     .tipo-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
     .tipo-btn{background:var(--bg);border:2px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;padding:16px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s}
     .tipo-btn .icon{font-size:1.8rem}
-    .tipo-btn.sel-despacho{background:rgba(218,54,51,.12);border-color:var(--red);color:var(--red)}
+    .tipo-btn.sel-envio{background:rgba(46,160,67,.12);border-color:var(--green);color:var(--green)}
     .tipo-btn.sel-desarme{background:rgba(163,113,247,.12);border-color:var(--purple);color:var(--purple)}
-
-    .btn-submit{width:100%;border:none;border-radius:var(--radius);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;text-transform:uppercase;letter-spacing:.08em;padding:17px;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;color:#000}
+    .btn-submit{width:100%;border:none;border-radius:var(--radius);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;text-transform:uppercase;letter-spacing:.08em;padding:17px;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px}
     .btn-submit:active{opacity:.85;transform:scale(.98)}
     .btn-submit:disabled{opacity:.4;pointer-events:none}
-    .btn-submit.azul{background:linear-gradient(135deg,var(--accent),var(--accent2))}
-    .btn-submit.rojo{background:linear-gradient(135deg,var(--red),#b02020);color:#fff}
+    .btn-submit.azul{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000}
+    .btn-submit.verde{background:linear-gradient(135deg,var(--green),#1a7a30);color:#fff}
     .btn-submit.morado{background:linear-gradient(135deg,var(--purple),#7c3aed);color:#fff}
-
     .stock-box{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
     .stock-box-label{font-size:.8rem;color:var(--muted);font-weight:500}
     .stock-box-val{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:700}
-
     .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
     .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 8px;text-align:center}
     .stat-val{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;line-height:1}
     .stat-lbl{font-size:.65rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
     .stat-card.azul .stat-val{color:var(--blue)}.stat-card.verde .stat-val{color:var(--green)}.stat-card.rojo .stat-val{color:var(--red)}
-
     .stock-list,.mov-list{list-style:none}
     .stock-item{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);gap:12px}
     .stock-item:last-child{border-bottom:none}
@@ -66,28 +60,24 @@
     .stock-num{font-size:.72rem;color:var(--muted);margin-top:1px}
     .stock-qty{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:900;min-width:44px;text-align:right}
     .stock-qty.ok{color:var(--green)}.stock-qty.bajo{color:var(--accent)}.stock-qty.vacio{color:var(--red)}
-
     .mov-item{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);gap:11px}
     .mov-item:last-child{border-bottom:none}
     .mov-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-    .mov-ico.ing{background:rgba(46,160,67,.15)}.mov-ico.des{background:rgba(218,54,51,.15)}.mov-ico.dsm{background:rgba(163,113,247,.15)}
+    .mov-ico.ing{background:rgba(46,160,67,.15)}.mov-ico.env{background:rgba(56,139,253,.15)}.mov-ico.dsm{background:rgba(163,113,247,.15)}
     .mov-datos{flex:1;min-width:0}
     .mov-cliente{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .mov-detalle{font-size:.72rem;color:var(--muted);margin-top:1px}
     .mov-cant{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;white-space:nowrap}
-    .mov-cant.ing{color:var(--green)}.mov-cant.des{color:var(--red)}.mov-cant.dsm{color:var(--purple)}
-
+    .mov-cant.ing{color:var(--green)}.mov-cant.env{color:var(--blue)}.mov-cant.dsm{color:var(--purple)}
     .autocomplete-wrap{position:relative}
     .sug-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:50;max-height:200px;overflow-y:auto;display:none}
     .sug-item{padding:12px 14px;font-size:.9rem;cursor:pointer;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
     .sug-item:last-child{border-bottom:none}
     .sug-item:active{background:var(--surface)}
     .sug-num{color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;min-width:48px}
-
     .cliente-preview{background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.3);border-radius:9px;padding:12px 14px;margin-bottom:13px;display:none}
     .cliente-preview-nombre{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;color:var(--accent)}
     .cliente-preview-num{font-size:.75rem;color:var(--muted);margin-top:2px}
-
     .empty{text-align:center;padding:36px 16px;color:var(--muted)}
     .empty-icon{font-size:2.5rem;margin-bottom:8px}
     .empty p{font-size:.85rem}
@@ -100,12 +90,10 @@
   </style>
 </head>
 <body>
-
 <header>
   <div class="logo-icon">📦</div>
   <h1>Control de Rollos<span id="fechaHeader">Cargando...</span></h1>
 </header>
-
 <div class="tabs">
   <button class="tab active" onclick="mostrarPagina('ingreso',this)">➕ Ingreso</button>
   <button class="tab" onclick="mostrarPagina('salida',this)">📤 Salida</button>
@@ -125,7 +113,7 @@
         <input type="number" id="cant-ingreso" placeholder="0" min="1" inputmode="numeric">
       </div>
     </div>
-    <div class="field"><label>N° Cliente</label>
+    <div class="field"><label>N° de Pedido</label>
       <div class="autocomplete-wrap">
         <input type="text" id="numcli-ingreso" placeholder="Escribí el número..." inputmode="numeric" oninput="filtrarSugerencias('ingreso')" autocomplete="off">
         <div class="sug-list" id="sugs-ingreso"></div>
@@ -135,19 +123,19 @@
       <div class="cliente-preview-nombre" id="preview-ingreso-nombre"></div>
       <div class="cliente-preview-num" id="preview-ingreso-num"></div>
     </div>
-    <div class="field"><label>Nombre (si es nuevo)</label>
-      <input type="text" id="cli-ingreso" placeholder="Solo para clientes nuevos" autocomplete="off">
+    <div class="field"><label>Nombre del Cliente (si es nuevo)</label>
+      <input type="text" id="cli-ingreso" placeholder="Solo para pedidos nuevos" autocomplete="off">
     </div>
     <button class="btn-submit azul" id="btn-ingreso" onclick="registrarIngreso()"><span>Registrar Ingreso</span></button>
   </div>
 </div>
 
-<!-- SALIDA (DESPACHO / DESARME) -->
+<!-- SALIDA -->
 <div id="page-salida" class="page">
   <div class="section-title">📤 Tipo de Salida</div>
   <div class="tipo-row">
-    <button class="tipo-btn" id="tipo-despacho" onclick="selTipo('despacho')">
-      <span class="icon">🚚</span>Despacho
+    <button class="tipo-btn" id="tipo-envio" onclick="selTipo('envio')">
+      <span class="icon">🚚</span>Envío
     </button>
     <button class="tipo-btn" id="tipo-desarme" onclick="selTipo('desarme')">
       <span class="icon">🔧</span>Desarme
@@ -162,9 +150,9 @@
         <input type="number" id="cant-salida" placeholder="0" min="1" inputmode="numeric">
       </div>
     </div>
-    <div class="field"><label>N° Cliente</label>
+    <div class="field"><label>N° de Pedido</label>
       <div class="autocomplete-wrap">
-        <input type="text" id="numcli-salida" placeholder="Escribí el número..." inputmode="numeric" oninput="filtrarSugerencias('salida')" autocomplete="off">
+        <input type="text" id="numcli-salida" placeholder="Escribí el número..." inputmode="numeric" oninput="buscarPedido()" autocomplete="off">
         <div class="sug-list" id="sugs-salida"></div>
       </div>
     </div>
@@ -176,18 +164,18 @@
       <span class="stock-box-label">Stock disponible</span>
       <span class="stock-box-val" id="stock-preview" style="color:var(--muted)">—</span>
     </div>
-    <button class="btn-submit rojo" id="btn-salida" onclick="registrarSalida()" disabled><span>Seleccioná el tipo</span></button>
+    <button class="btn-submit verde" id="btn-salida" onclick="registrarSalida()" disabled><span>Seleccioná el tipo</span></button>
   </div>
 </div>
 
 <!-- INVENTARIO -->
 <div id="page-inventario" class="page">
   <div class="stats-row">
-    <div class="stat-card azul"><div class="stat-val" id="stat-clientes">—</div><div class="stat-lbl">Clientes</div></div>
+    <div class="stat-card azul"><div class="stat-val" id="stat-clientes">—</div><div class="stat-lbl">Pedidos</div></div>
     <div class="stat-card verde"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Rollos</div></div>
     <div class="stat-card rojo"><div class="stat-val" id="stat-bajos">—</div><div class="stat-lbl">Stock bajo</div></div>
   </div>
-  <div class="section-title">📊 Stock por Cliente</div>
+  <div class="section-title">📊 Stock por Pedido</div>
   <div class="card">
     <ul class="stock-list" id="stock-list"><div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div></ul>
   </div>
@@ -205,14 +193,11 @@
 
 <script>
 var GAS_URL = "https://script.google.com/macros/s/AKfycbzcM5DHgiy9ErkuzyEDg0tiPTiCQZ1UvYx9_1BGuH-SG8Siuo8ICrZIW5rv3vGbiv_EHw/exec";
-
 var clientes = [], inventario = [], tipoSalida = null;
 
-// Init
 setDiaActual();
 cargarClientes();
 setInterval(setDiaActual, 60000);
-document.getElementById("numcli-salida").addEventListener("input", actualizarStockPreview);
 
 function setDiaActual() {
   var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
@@ -236,17 +221,12 @@ function mostrarPagina(nombre, tabEl) {
 
 function selTipo(tipo) {
   tipoSalida = tipo;
-  document.getElementById("tipo-despacho").className = "tipo-btn" + (tipo==="despacho"?" sel-despacho":"");
-  document.getElementById("tipo-desarme").className = "tipo-btn" + (tipo==="desarme"?" sel-desarme":"");
+  document.getElementById("tipo-envio").className = "tipo-btn"+(tipo==="envio"?" sel-envio":"");
+  document.getElementById("tipo-desarme").className = "tipo-btn"+(tipo==="desarme"?" sel-desarme":"");
   var btn = document.getElementById("btn-salida");
   btn.disabled = false;
-  if (tipo==="despacho") {
-    btn.className = "btn-submit rojo";
-    btn.innerHTML = "<span>Confirmar Despacho 🚚</span>";
-  } else {
-    btn.className = "btn-submit morado";
-    btn.innerHTML = "<span>Confirmar Desarme 🔧</span>";
-  }
+  if (tipo==="envio") { btn.className="btn-submit verde"; btn.innerHTML="<span>Confirmar Envío 🚚</span>"; }
+  else { btn.className="btn-submit morado"; btn.innerHTML="<span>Confirmar Desarme 🔧</span>"; }
 }
 
 function llamar(action, params) {
@@ -259,15 +239,35 @@ function cargarClientes() {
   llamar("obtenerClientes").then(function(res){ if(res&&res.clientes) clientes=res.clientes; });
 }
 
+// Busca por N° de pedido y autocompleta
+function buscarPedido() {
+  var val = document.getElementById("numcli-salida").value.trim();
+  var sugs = document.getElementById("sugs-salida");
+  if (!val) { sugs.style.display="none"; ocultarPreview("salida"); actualizarStockPreview(); return; }
+
+  // Coincidencia exacta
+  var exacto = clientes.find(function(c){ return c.num===val; });
+  if (exacto) { mostrarPreview("salida", exacto); sugs.style.display="none"; actualizarStockPreview(); return; }
+
+  ocultarPreview("salida");
+  actualizarStockPreview();
+
+  var hits = clientes.filter(function(c){ return c.num.startsWith(val)||c.nombre.toLowerCase().includes(val.toLowerCase()); }).slice(0,8);
+  if (!hits.length) { sugs.style.display="none"; return; }
+  sugs.innerHTML = hits.map(function(c){
+    return '<div class="sug-item" ontouchend="elegirCliente(\'salida\',\''+c.num.replace(/'/g,"&#39;")+'\',\''+c.nombre.replace(/'/g,"&#39;")+'\')"><span class="sug-num">'+c.num+'</span><span>'+c.nombre+'</span></div>';
+  }).join("");
+  sugs.style.display = "block";
+}
+
 function filtrarSugerencias(form) {
   var val = document.getElementById("numcli-"+form).value.trim();
   var sugs = document.getElementById("sugs-"+form);
   if (!val) { sugs.style.display="none"; ocultarPreview(form); return; }
-  // Buscar coincidencia exacta primero
   var exacto = clientes.find(function(c){ return c.num===val; });
   if (exacto) { mostrarPreview(form, exacto); sugs.style.display="none"; return; }
   ocultarPreview(form);
-  var hits = clientes.filter(function(c){ return c.num.includes(val)||c.nombre.toLowerCase().includes(val.toLowerCase()); }).slice(0,8);
+  var hits = clientes.filter(function(c){ return c.num.startsWith(val)||c.nombre.toLowerCase().includes(val.toLowerCase()); }).slice(0,8);
   if (!hits.length) { sugs.style.display="none"; return; }
   sugs.innerHTML = hits.map(function(c){
     return '<div class="sug-item" ontouchend="elegirCliente(\''+form+'\',\''+c.num.replace(/'/g,"&#39;")+'\',\''+c.nombre.replace(/'/g,"&#39;")+'\')"><span class="sug-num">'+c.num+'</span><span>'+c.nombre+'</span></div>';
@@ -280,7 +280,6 @@ function elegirCliente(form, num, nombre) {
   document.getElementById("sugs-"+form).style.display = "none";
   mostrarPreview(form, {num:num, nombre:nombre});
   if (form==="salida") actualizarStockPreview();
-  // Limpiar campo nombre si existe
   var cli = document.getElementById("cli-"+form);
   if (cli) cli.value = nombre;
 }
@@ -289,12 +288,10 @@ function mostrarPreview(form, cliente) {
   var prev = document.getElementById("preview-"+form);
   if (!prev) return;
   document.getElementById("preview-"+form+"-nombre").textContent = cliente.nombre;
-  document.getElementById("preview-"+form+"-num").textContent = "N° " + cliente.num;
+  document.getElementById("preview-"+form+"-num").textContent = "N° Pedido: " + cliente.num;
   prev.style.display = "block";
-  // Autocompletar nombre si hay campo
   var cli = document.getElementById("cli-"+form);
   if (cli) cli.value = cliente.nombre;
-  if (form==="salida") actualizarStockPreview();
 }
 
 function ocultarPreview(form) {
@@ -311,14 +308,11 @@ function actualizarStockPreview() {
   var el = document.getElementById("stock-preview");
   if (!numCli) { el.textContent="—"; el.style.color="var(--muted)"; return; }
   var item = inventario.find(function(i){ return i.numCliente.toString()===numCli; });
-  if (item) {
-    el.textContent = item.stock + " rollos";
-    el.style.color = item.stock===0?"var(--red)":item.stock<5?"var(--accent)":"var(--green)";
-  } else { el.textContent="Sin stock"; el.style.color="var(--red)"; }
+  if (item) { el.textContent=item.stock+" rollos"; el.style.color=item.stock===0?"var(--red)":item.stock<5?"var(--accent)":"var(--green)"; }
+  else { el.textContent="Sin stock"; el.style.color="var(--red)"; }
 }
 
-function getNombreCliente(form) {
-  // Primero del preview, luego del campo nombre, luego buscar en lista
+function getNombre(form) {
   var num = document.getElementById("numcli-"+form).value.trim();
   var cli = document.getElementById("cli-"+form);
   if (cli && cli.value.trim()) return cli.value.trim();
@@ -328,48 +322,43 @@ function getNombreCliente(form) {
 
 function registrarIngreso() {
   var num = document.getElementById("numcli-ingreso").value.trim();
-  var nombre = getNombreCliente("ingreso");
+  var nombre = getNombre("ingreso");
   var cant = document.getElementById("cant-ingreso").value;
   var dia = document.getElementById("dia-ingreso").value;
-  if (!num) { mostrarToast("⚠️ Ingresá el N° de cliente","error"); return; }
+  if (!num) { mostrarToast("⚠️ Ingresá el N° de pedido","error"); return; }
   if (!nombre) { mostrarToast("⚠️ Ingresá el nombre del cliente","error"); return; }
   if (!cant||parseInt(cant)<=0) { mostrarToast("⚠️ Ingresá la cantidad","error"); return; }
-  var datos = { dia:dia, numCliente:num, cliente:nombre, cantidad:cant };
   var btn = document.getElementById("btn-ingreso"); setLoading(btn,true,"dark");
-  llamar("registrarIngreso",datos).then(function(res){
+  llamar("registrarIngreso",{dia:dia,numCliente:num,cliente:nombre,cantidad:cant}).then(function(res){
     setLoading(btn,false);
-    mostrarToast(res.msg||(res.ok?"✅ Ingreso registrado":"❌ Error"), res.ok?"ok":"error");
+    mostrarToast(res.msg||(res.ok?"✅ Ingreso registrado":"❌ Error"),res.ok?"ok":"error");
     if(res.ok){ limpiarForm("ingreso"); cargarClientes(); }
   });
 }
 
 function registrarSalida() {
-  if (!tipoSalida) { mostrarToast("⚠️ Seleccioná Despacho o Desarme","error"); return; }
+  if (!tipoSalida) { mostrarToast("⚠️ Seleccioná Envío o Desarme","error"); return; }
   var num = document.getElementById("numcli-salida").value.trim();
-  var nombre = getNombreCliente("salida");
+  var nombre = getNombre("salida");
   var cant = document.getElementById("cant-salida").value;
   var dia = document.getElementById("dia-salida").value;
-  if (!num) { mostrarToast("⚠️ Ingresá el N° de cliente","error"); return; }
-  if (!nombre) { mostrarToast("⚠️ Cliente no encontrado","error"); return; }
+  if (!num) { mostrarToast("⚠️ Ingresá el N° de pedido","error"); return; }
+  if (!nombre) { mostrarToast("⚠️ Pedido no encontrado","error"); return; }
   if (!cant||parseInt(cant)<=0) { mostrarToast("⚠️ Ingresá la cantidad","error"); return; }
-  var datos = { dia:dia, numCliente:num, cliente:nombre, cantidad:cant, tipo: tipoSalida.toUpperCase() };
   var btn = document.getElementById("btn-salida"); setLoading(btn,true,"white");
-  llamar("registrarSalida",datos).then(function(res){
+  llamar("registrarSalida",{dia:dia,numCliente:num,cliente:nombre,cantidad:cant,tipo:tipoSalida.toUpperCase()}).then(function(res){
     setLoading(btn,false);
-    // Restaurar botón según tipo
-    if (tipoSalida==="despacho") btn.innerHTML="<span>Confirmar Despacho 🚚</span>";
+    if(tipoSalida==="envio") btn.innerHTML="<span>Confirmar Envío 🚚</span>";
     else btn.innerHTML="<span>Confirmar Desarme 🔧</span>";
-    mostrarToast(res.msg||(res.ok?"✅ Registrado":"❌ Error"), res.ok?"ok":"error");
+    mostrarToast(res.msg||(res.ok?"✅ Registrado":"❌ Error"),res.ok?"ok":"error");
     if(res.ok){ limpiarSalida(); }
   });
 }
 
 function limpiarForm(form) {
   document.getElementById("numcli-"+form).value="";
-  var cli = document.getElementById("cli-"+form);
-  if(cli) cli.value="";
-  var cant = document.getElementById("cant-"+form);
-  if(cant) cant.value="";
+  var cli=document.getElementById("cli-"+form); if(cli) cli.value="";
+  var cant=document.getElementById("cant-"+form); if(cant) cant.value="";
   ocultarPreview(form);
 }
 
@@ -387,20 +376,20 @@ function cargarInventario() {
 }
 
 function renderInventario(rows) {
-  var list = document.getElementById("stock-list");
+  var list=document.getElementById("stock-list");
   if (!rows||!rows.length) {
     list.innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>Sin datos aún</p></div>';
     ["stat-clientes","stat-total","stat-bajos"].forEach(function(id){document.getElementById(id).textContent="0";});
     return;
   }
-  var total=0, bajos=0;
-  rows.forEach(function(r){ total+=r.stock; if(r.stock<5) bajos++; });
+  var total=0,bajos=0;
+  rows.forEach(function(r){total+=r.stock;if(r.stock<5)bajos++;});
   document.getElementById("stat-clientes").textContent=rows.length;
   document.getElementById("stat-total").textContent=total;
   document.getElementById("stat-bajos").textContent=bajos;
   list.innerHTML=rows.map(function(r){
     var cls=r.stock===0?"vacio":r.stock<5?"bajo":"ok";
-    return '<li class="stock-item"><div class="stock-avatar">'+(r.cliente||"?").charAt(0).toUpperCase()+'</div><div class="stock-info"><div class="stock-nombre">'+r.cliente+'</div><div class="stock-num">N° '+r.numCliente+'</div></div><div class="stock-qty '+cls+'">'+r.stock+'</div></li>';
+    return '<li class="stock-item"><div class="stock-avatar">'+(r.cliente||"?").charAt(0).toUpperCase()+'</div><div class="stock-info"><div class="stock-nombre">'+r.cliente+'</div><div class="stock-num">N° Pedido: '+r.numCliente+'</div></div><div class="stock-qty '+cls+'">'+r.stock+'</div></li>';
   }).join("");
 }
 
@@ -410,22 +399,22 @@ function cargarHistorial() {
 }
 
 function renderHistorial(rows) {
-  var list = document.getElementById("mov-list");
+  var list=document.getElementById("mov-list");
   if (!rows||!rows.length) { list.innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>Sin movimientos</p></div>'; return; }
   list.innerHTML=rows.map(function(r){
-    var esIng=r.tipo==="INGRESO";
-    var esDsm=r.tipo==="DESARME";
-    var cls=esIng?"ing":esDsm?"dsm":"des";
-    var ico=esIng?"➕":esDsm?"🔧":"🚚";
+    var esIng=r.tipo==="INGRESO", esEnv=r.tipo==="ENVIO";
+    var cls=esIng?"ing":esEnv?"env":"dsm";
+    var ico=esIng?"➕":esEnv?"🚚":"🔧";
     var sig=esIng?"+":"−";
-    return '<li class="mov-item"><div class="mov-ico '+cls+'">'+ico+'</div><div class="mov-datos"><div class="mov-cliente">'+r.cliente+'</div><div class="mov-detalle">'+r.tipo+' · '+r.dia+' · '+r.fecha+'</div></div><div class="mov-cant '+cls+'">'+sig+r.cantidad+'</div></li>';
+    var label=esIng?"INGRESO":esEnv?"ENVÍO":"DESARME";
+    return '<li class="mov-item"><div class="mov-ico '+cls+'">'+ico+'</div><div class="mov-datos"><div class="mov-cliente">'+r.cliente+'</div><div class="mov-detalle">'+label+' · '+r.dia+' · '+r.fecha+' · N° '+r.numCliente+'</div></div><div class="mov-cant '+cls+'">'+sig+r.cantidad+'</div></li>';
   }).join("");
 }
 
-function setLoading(btn, loading, spinColor) {
+function setLoading(btn,loading,spinColor){
   btn.disabled=loading;
-  if(loading){ if(!btn.dataset.orig) btn.dataset.orig=btn.innerHTML; btn.innerHTML='<div class="spinner'+(spinColor==="dark"?" dark":"")+'"></div>'; }
-  else{ if(btn.dataset.orig) btn.innerHTML=btn.dataset.orig; }
+  if(loading){if(!btn.dataset.orig)btn.dataset.orig=btn.innerHTML;btn.innerHTML='<div class="spinner'+(spinColor==="dark"?" dark":"")+'"></div>';}
+  else{if(btn.dataset.orig)btn.innerHTML=btn.dataset.orig;}
 }
 
 var toastTimer;
