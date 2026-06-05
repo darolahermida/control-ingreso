@@ -296,6 +296,7 @@
       </select>
     </div>
     <button class="btn-submit azul" id="btn-guardar-edit" onclick="guardarEdicion()" style="margin-top:16px"><span>💾 Guardar Cambios</span></button>
+    <button class="btn-submit" onclick="eliminarRegistro()" style="margin-top:10px;background:var(--red);color:#fff"><span>🗑️ Eliminar Registro</span></button>
   </div>
 </div>
 
@@ -580,6 +581,20 @@ function abrirEditar(idx) {
 
 function cerrarModal() {
   document.getElementById("modal-editar").classList.remove("open");
+}
+
+function eliminarRegistro() {
+  var fila = document.getElementById("edit-fila").value;
+  var cliente = document.getElementById("edit-cliente").value;
+  if (!confirm) { mostrarToast("⚠️ No se pudo confirmar","error"); return; }
+  var btn = document.querySelector('[onclick="eliminarRegistro()"]');
+  setLoading(btn, true, "white");
+  llamar("eliminarMovimiento", { fila: fila, cliente: cliente }).then(function(res){
+    setLoading(btn, false);
+    btn.innerHTML = "<span>🗑️ Eliminar Registro</span>";
+    mostrarToast(res.msg||(res.ok?"✅ Eliminado":"❌ Error"), res.ok?"ok":"error");
+    if(res.ok){ cerrarModal(); cargarHistorial(); cargarInventario(); }
+  });
 }
 
 function guardarEdicion() {
