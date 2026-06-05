@@ -116,6 +116,17 @@
   #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.05em;padding:14px 28px;border-radius:30px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   #toast.error{background:var(--red)}#toast.warn{background:#7d5c00}
+  .voice-row{display:flex;gap:8px}.voice-row input{flex:1}
+  .btn-voice{background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:1.2rem;width:46px;height:46px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s}
+  .btn-voice.listening{background:rgba(218,54,51,.2);border-color:var(--red);color:var(--red);animation:pulse 1s infinite}
+  .btn-voice:active{opacity:.8}
+  #voice-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:800;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+  #voice-overlay.open{display:flex}
+  .voice-circle{width:100px;height:100px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:3rem;animation:voicepulse 1s ease-in-out infinite}
+  @keyframes voicepulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(218,54,51,.4)}50%{transform:scale(1.1);box-shadow:0 0 0 20px rgba(218,54,51,0)}}
+  .voice-label{color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.3rem;text-transform:uppercase;letter-spacing:.1em}
+  .voice-transcript{color:var(--accent);font-size:1.1rem;font-style:italic;max-width:80vw;text-align:center;min-height:30px}
+  .btn-cancel-voice{background:var(--surface);border:1px solid var(--border);border-radius:30px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;padding:12px 28px;cursor:pointer;margin-top:10px}
 </style>
 </head>
 <body>
@@ -142,8 +153,9 @@
     <div class="field">
       <label>N° de Partida</label>
       <div class="scan-row">
-        <input type="text" id="partida" placeholder="Escanear o ingresar..." autocomplete="off">
-        <button class="btn-scan" onclick="openScanner()">📷 Escanear</button>
+        <input type="text" id="partida" placeholder="Escanear, dictar o ingresar..." autocomplete="off">
+        <button class="btn-voice" onclick="startVoice('partida','N° de Partida')" title="Dictar">🎤</button>
+        <button class="btn-scan" onclick="openScanner()">📷</button>
       </div>
     </div>
   </div>
@@ -151,18 +163,27 @@
   <div class="card">
     <div class="field">
       <label>Descripción del Producto</label>
-      <input type="text" id="producto" placeholder="Ej: Cuero vacuno, Cuero ovino..." autocomplete="off">
+      <div class="voice-row">
+        <input type="text" id="producto" placeholder="Ej: Cuero vacuno, Cuero ovino..." autocomplete="off">
+        <button class="btn-voice" onclick="startVoice('producto','Producto')" title="Dictar">🎤</button>
+      </div>
     </div>
   </div>
   <div class="section-title">👤 Personas</div>
   <div class="card">
     <div class="field">
       <label>Persona que Ingresa</label>
-      <input type="text" id="persona-ingresa" placeholder="Nombre completo..." autocomplete="off">
+      <div class="voice-row">
+        <input type="text" id="persona-ingresa" placeholder="Nombre completo..." autocomplete="off">
+        <button class="btn-voice" onclick="startVoice('persona-ingresa','Persona que Ingresa')" title="Dictar">🎤</button>
+      </div>
     </div>
     <div class="field">
       <label>Persona que Recibe</label>
-      <input type="text" id="persona-recibe" placeholder="Nombre completo..." autocomplete="off">
+      <div class="voice-row">
+        <input type="text" id="persona-recibe" placeholder="Nombre completo..." autocomplete="off">
+        <button class="btn-voice" onclick="startVoice('persona-recibe','Persona que Recibe')" title="Dictar">🎤</button>
+      </div>
     </div>
   </div>
   <div class="section-title">🐄 Cueros</div>
@@ -292,6 +313,14 @@
     <p class="scan-hint">Apuntá la cámara al código de barras</p>
   </div>
 </div>
+<!-- VOICE OVERLAY -->
+<div id="voice-overlay">
+  <div class="voice-circle">🎤</div>
+  <div class="voice-label" id="voice-field-label">Escuchando...</div>
+  <div class="voice-transcript" id="voice-transcript">Hablá ahora...</div>
+  <button class="btn-cancel-voice" onclick="stopVoice(false)">✕ Cancelar</button>
+</div>
+
 <div class="scan-success-flash" id="scan-flash"></div>
 <div id="toast"></div>
 
@@ -709,6 +738,53 @@ function closeScanner(){
   scannerActive=false;
   try{Quagga.stop();}catch(e){}
   document.getElementById('scanner-modal').classList.remove('open');
+}
+
+// =====================
+// VOZ
+// =====================
+let recognition = null;
+let voiceTargetId = null;
+let voiceActive = false;
+
+function startVoice(fieldId, fieldLabel) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast('⚠️ Tu navegador no soporta reconocimiento de voz', 'error');
+    return;
+  }
+  voiceTargetId = fieldId;
+  voiceActive = true;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'es-AR';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  document.getElementById('voice-field-label').textContent = `Dictando: ${fieldLabel}`;
+  document.getElementById('voice-transcript').textContent = 'Hablá ahora...';
+  document.getElementById('voice-overlay').classList.add('open');
+  recognition.onresult = function(event) {
+    let interim = '', final = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) final += event.results[i][0].transcript;
+      else interim += event.results[i][0].transcript;
+    }
+    document.getElementById('voice-transcript').textContent = final || interim || 'Escuchando...';
+    if (final) { document.getElementById(voiceTargetId).value = final.trim(); stopVoice(true); }
+  };
+  recognition.onerror = function(e) {
+    stopVoice(false);
+    if (e.error==='not-allowed') showToast('⚠️ Permití el acceso al micrófono','error');
+    else showToast('⚠️ No se pudo escuchar, intentá de nuevo','error');
+  };
+  recognition.onend = function() { if(voiceActive) stopVoice(false); };
+  recognition.start();
+}
+
+function stopVoice(success) {
+  voiceActive = false;
+  document.getElementById('voice-overlay').classList.remove('open');
+  if(recognition){try{recognition.stop();}catch(e){} recognition=null;}
+  if(success) showToast('✅ Texto guardado');
 }
 
 updatePendingBanner();
