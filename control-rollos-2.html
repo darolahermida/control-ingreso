@@ -432,6 +432,13 @@ function mostrarPreview(form, cliente) {
   prev.style.display = "block";
   var cli = document.getElementById("cli-"+form);
   if (cli) cli.value = cliente.nombre;
+  if (form === "salida") {
+    var item = inventario.find(function(i){ return i.numCliente.toString()===cliente.num; });
+    if (item && item.stock > 0) {
+      document.getElementById("cant-salida").value = item.stock;
+    }
+    actualizarStockPreview();
+  }
 }
 
 function ocultarPreview(form) {
@@ -551,7 +558,8 @@ function renderHistorial(rows) {
     var sig=esIng?"+":"−";
     var label=esIng?"INGRESO":esEnv?"ENVÍO":"DESARME";
     var transp = r.transporte ? " · "+r.transporte : "";
-    return '<li class="mov-item"><div class="mov-ico '+cls+'">'+ico+'</div><div class="mov-datos"><div class="mov-cliente">'+r.cliente+'</div><div class="mov-detalle">'+label+transp+' · '+r.dia+' · '+r.fecha+' · N° '+r.numCliente+'</div><button class="btn-edit-mov" onclick="abrirEditar('+idx+')">✏️ Editar</button></div><div class="mov-cant '+cls+'">'+sig+r.cantidad+'</div></li>';
+    var hora = r.hora ? " " + r.hora : "";
+    return '<li class="mov-item"><div class="mov-ico '+cls+'">'+ico+'</div><div class="mov-datos"><div class="mov-cliente">'+r.cliente+'</div><div class="mov-detalle">'+label+transp+' · '+r.dia+' · '+r.fecha+hora+' · N° '+r.numCliente+'</div><button class="btn-edit-mov" onclick="abrirEditar('+idx+')">✏️ Editar</button></div><div class="mov-cant '+cls+'">'+sig+r.cantidad+'</div></li>';
   }).join("");
 }
 
@@ -559,12 +567,12 @@ function renderHistorial(rows) {
 function abrirEditar(idx) {
   var r = historialData[idx];
   if (!r) return;
-  document.getElementById("edit-fila").value = r.fila || idx;
-  document.getElementById("edit-num").value = r.numCliente;
-  document.getElementById("edit-cliente").value = r.cliente;
-  document.getElementById("edit-cant").value = r.cantidad;
-  document.getElementById("edit-tipo").value = r.tipo;
-  // Seleccionar día
+  document.getElementById("edit-fila").value = r.fila !== undefined ? r.fila : idx;
+  document.getElementById("edit-num").value = r.numCliente || "";
+  document.getElementById("edit-cliente").value = r.cliente || "";
+  document.getElementById("edit-cant").value = r.cantidad || "";
+  var tipoEl = document.getElementById("edit-tipo");
+  tipoEl.value = r.tipo || "INGRESO";
   var sel = document.getElementById("edit-dia");
   for (var i=0;i<sel.options.length;i++){ if(sel.options[i].value===r.dia){sel.selectedIndex=i;break;} }
   document.getElementById("modal-editar").classList.add("open");
