@@ -355,6 +355,7 @@ function mostrarPagina(nombre, tabEl) {
   tabEl.classList.add("active");
   if (nombre==="inventario") cargarInventario();
   if (nombre==="historial") cargarHistorial();
+  if (nombre==="salida") { llamar("obtenerInventario").then(function(res){ inventario=res.rows||[]; }); }
 }
 
 function selTipo(tipo) {
