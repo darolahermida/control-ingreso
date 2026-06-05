@@ -33,13 +33,21 @@
     input::placeholder{color:var(--muted)}
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 
+    /* VOZ */
+    .input-voice{display:flex;gap:8px;align-items:center}
+    .input-voice input{flex:1}
+    .btn-voice{width:44px;height:44px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+    .btn-voice.escuchando{background:rgba(218,54,51,.2);border-color:var(--red);color:var(--red);animation:pulseVoz 1s infinite}
+    @keyframes pulseVoz{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+    /* TIPO */
     .tipo-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
     .tipo-btn{background:var(--bg);border:2px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;padding:16px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s}
     .tipo-btn .icon{font-size:1.8rem}
     .tipo-btn.sel-envio{background:rgba(46,160,67,.12);border-color:var(--green);color:var(--green)}
     .tipo-btn.sel-desarme{background:rgba(163,113,247,.12);border-color:var(--purple);color:var(--purple)}
 
-    /* TRANSPORTISTAS GRID */
+    /* TRANSPORTISTAS */
     .transport-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
     .transport-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.03em;padding:10px 6px;cursor:pointer;text-align:center;transition:all .2s;line-height:1.2}
     .transport-btn.selected{background:rgba(56,139,253,.15);border-color:var(--blue);color:var(--blue)}
@@ -53,6 +61,7 @@
     .btn-submit.azul{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000}
     .btn-submit.verde{background:linear-gradient(135deg,var(--green),#1a7a30);color:#fff}
     .btn-submit.morado{background:linear-gradient(135deg,var(--purple),#7c3aed);color:#fff}
+    .btn-submit.gris{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
 
     .stock-box{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
     .stock-box-label{font-size:.8rem;color:var(--muted);font-weight:500}
@@ -83,6 +92,7 @@
     .mov-detalle{font-size:.72rem;color:var(--muted);margin-top:1px}
     .mov-cant{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;white-space:nowrap}
     .mov-cant.ing{color:var(--green)}.mov-cant.env{color:var(--blue)}.mov-cant.dsm{color:var(--purple)}
+    .btn-edit-mov{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;padding:4px 10px;cursor:pointer;margin-top:4px;display:inline-block}
 
     .autocomplete-wrap{position:relative}
     .sug-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:50;max-height:200px;overflow-y:auto;display:none}
@@ -94,6 +104,14 @@
     .cliente-preview{background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.3);border-radius:9px;padding:12px 14px;margin-bottom:13px;display:none}
     .cliente-preview-nombre{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;color:var(--accent)}
     .cliente-preview-num{font-size:.75rem;color:var(--muted);margin-top:2px}
+
+    /* MODAL EDITAR */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:flex-end;justify-content:center}
+    .modal-bg.open{display:flex}
+    .modal-sheet{background:var(--surface);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:24px 20px 36px;width:100%;max-height:90dvh;overflow-y:auto;animation:slideup .25s ease}
+    @keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+    .btn-close-modal{background:var(--surface2);border:1px solid var(--border);border-radius:50%;color:var(--muted);width:32px;height:32px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
     .empty{text-align:center;padding:36px 16px;color:var(--muted)}
     .empty-icon{font-size:2.5rem;margin-bottom:8px}
@@ -127,12 +145,18 @@
         <select id="dia-ingreso"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option></select>
       </div>
       <div class="field"><label>Cantidad</label>
-        <input type="number" id="cant-ingreso" placeholder="0" min="1" inputmode="numeric">
+        <div class="input-voice">
+          <input type="number" id="cant-ingreso" placeholder="0" min="1" inputmode="numeric">
+          <button class="btn-voice" onclick="iniciarVoz('cant-ingreso','numero')" title="Voz">🎤</button>
+        </div>
       </div>
     </div>
     <div class="field"><label>N° de Pedido</label>
       <div class="autocomplete-wrap">
-        <input type="text" id="numcli-ingreso" placeholder="Escribí el número..." inputmode="numeric" oninput="filtrarSugerencias('ingreso')" autocomplete="off">
+        <div class="input-voice">
+          <input type="text" id="numcli-ingreso" placeholder="Escribí el número..." inputmode="numeric" oninput="filtrarSugerencias('ingreso')" autocomplete="off">
+          <button class="btn-voice" onclick="iniciarVoz('numcli-ingreso','numero')" title="Voz">🎤</button>
+        </div>
         <div class="sug-list" id="sugs-ingreso"></div>
       </div>
     </div>
@@ -141,7 +165,10 @@
       <div class="cliente-preview-num" id="preview-ingreso-num"></div>
     </div>
     <div class="field"><label>Nombre del Cliente (si es nuevo)</label>
-      <input type="text" id="cli-ingreso" placeholder="Solo para pedidos nuevos" autocomplete="off">
+      <div class="input-voice">
+        <input type="text" id="cli-ingreso" placeholder="Solo para pedidos nuevos" autocomplete="off">
+        <button class="btn-voice" onclick="iniciarVoz('cli-ingreso','texto')" title="Voz">🎤</button>
+      </div>
     </div>
     <button class="btn-submit azul" id="btn-ingreso" onclick="registrarIngreso()"><span>Registrar Ingreso</span></button>
   </div>
@@ -151,15 +178,9 @@
 <div id="page-salida" class="page">
   <div class="section-title">📤 Tipo de Salida</div>
   <div class="tipo-row">
-    <button class="tipo-btn" id="tipo-envio" onclick="selTipo('envio')">
-      <span class="icon">🚚</span>Envío
-    </button>
-    <button class="tipo-btn" id="tipo-desarme" onclick="selTipo('desarme')">
-      <span class="icon">🔧</span>Desarme
-    </button>
+    <button class="tipo-btn" id="tipo-envio" onclick="selTipo('envio')"><span class="icon">🚚</span>Envío</button>
+    <button class="tipo-btn" id="tipo-desarme" onclick="selTipo('desarme')"><span class="icon">🔧</span>Desarme</button>
   </div>
-
-  <!-- TRANSPORTISTAS — solo visible en Envío -->
   <div class="transport-section" id="transport-section">
     <div class="transport-label">🚛 Empresa de Transporte</div>
     <div class="transport-grid">
@@ -181,19 +202,24 @@
       <button class="transport-btn" onclick="selTransporte(this,'Otro')">Otro</button>
     </div>
   </div>
-
   <div class="card">
     <div class="row2">
       <div class="field"><label>Día</label>
         <select id="dia-salida"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option></select>
       </div>
       <div class="field"><label>Cantidad</label>
-        <input type="number" id="cant-salida" placeholder="0" min="1" inputmode="numeric">
+        <div class="input-voice">
+          <input type="number" id="cant-salida" placeholder="0" min="1" inputmode="numeric">
+          <button class="btn-voice" onclick="iniciarVoz('cant-salida','numero')" title="Voz">🎤</button>
+        </div>
       </div>
     </div>
     <div class="field"><label>N° de Pedido</label>
       <div class="autocomplete-wrap">
-        <input type="text" id="numcli-salida" placeholder="Escribí el número..." inputmode="numeric" oninput="buscarPedido()" autocomplete="off">
+        <div class="input-voice">
+          <input type="text" id="numcli-salida" placeholder="Escribí el número..." inputmode="numeric" oninput="buscarPedido()" autocomplete="off">
+          <button class="btn-voice" onclick="iniciarVoz('numcli-salida','numero')" title="Voz">🎤</button>
+        </div>
         <div class="sug-list" id="sugs-salida"></div>
       </div>
     </div>
@@ -230,15 +256,85 @@
   </div>
 </div>
 
+<!-- MODAL EDITAR -->
+<div class="modal-bg" id="modal-editar">
+  <div class="modal-sheet">
+    <div class="modal-title">
+      ✏️ Editar Registro
+      <button class="btn-close-modal" onclick="cerrarModal()">✕</button>
+    </div>
+    <input type="hidden" id="edit-fila">
+    <div class="field"><label>N° de Pedido</label>
+      <div class="input-voice">
+        <input type="text" id="edit-num" autocomplete="off">
+        <button class="btn-voice" onclick="iniciarVoz('edit-num','numero')">🎤</button>
+      </div>
+    </div>
+    <div class="field"><label>Cliente</label>
+      <div class="input-voice">
+        <input type="text" id="edit-cliente" autocomplete="off">
+        <button class="btn-voice" onclick="iniciarVoz('edit-cliente','texto')">🎤</button>
+      </div>
+    </div>
+    <div class="field"><label>Cantidad</label>
+      <div class="input-voice">
+        <input type="number" id="edit-cant" inputmode="numeric">
+        <button class="btn-voice" onclick="iniciarVoz('edit-cant','numero')">🎤</button>
+      </div>
+    </div>
+    <div class="field"><label>Tipo</label>
+      <select id="edit-tipo">
+        <option value="INGRESO">INGRESO</option>
+        <option value="ENVIO">ENVÍO</option>
+        <option value="DESARME">DESARME</option>
+      </select>
+    </div>
+    <div class="field"><label>Día</label>
+      <select id="edit-dia">
+        <option>Lunes</option><option>Martes</option><option>Miércoles</option>
+        <option>Jueves</option><option>Viernes</option><option>Sábado</option>
+      </select>
+    </div>
+    <button class="btn-submit azul" id="btn-guardar-edit" onclick="guardarEdicion()" style="margin-top:16px"><span>💾 Guardar Cambios</span></button>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 var GAS_URL = "https://script.google.com/macros/s/AKfycbzcM5DHgiy9ErkuzyEDg0tiPTiCQZ1UvYx9_1BGuH-SG8Siuo8ICrZIW5rv3vGbiv_EHw/exec";
 var clientes = [], inventario = [], tipoSalida = null, transporteSeleccionado = null;
+var historialData = [];
 
 setDiaActual();
 cargarClientes();
 setInterval(setDiaActual, 60000);
+
+// ── VOZ ──
+var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+var reconActivo = null;
+
+function iniciarVoz(inputId, modo) {
+  if (!SpeechRecognition) { mostrarToast("⚠️ Tu navegador no soporta voz","warn"); return; }
+  var btn = document.querySelector('[onclick="iniciarVoz(\''+inputId+'\',\''+modo+'\')"]');
+  if (reconActivo) { reconActivo.stop(); reconActivo = null; if(btn) btn.classList.remove("escuchando"); return; }
+  var rec = new SpeechRecognition();
+  rec.lang = "es-AR";
+  rec.continuous = false;
+  rec.interimResults = false;
+  rec.onstart = function(){ if(btn) btn.classList.add("escuchando"); mostrarToast("🎤 Escuchando...","warn"); };
+  rec.onresult = function(e){
+    var texto = e.results[0][0].transcript;
+    if (modo === "numero") texto = texto.replace(/\D/g,"");
+    document.getElementById(inputId).value = texto;
+    document.getElementById(inputId).dispatchEvent(new Event("input"));
+    mostrarToast("✅ \"" + texto + "\"");
+  };
+  rec.onerror = function(){ mostrarToast("⚠️ No se escuchó nada","error"); };
+  rec.onend = function(){ if(btn) btn.classList.remove("escuchando"); reconActivo = null; };
+  reconActivo = rec;
+  rec.start();
+}
 
 function setDiaActual() {
   var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
@@ -266,9 +362,7 @@ function selTipo(tipo) {
   document.querySelectorAll(".transport-btn").forEach(function(b){ b.classList.remove("selected"); });
   document.getElementById("tipo-envio").className = "tipo-btn"+(tipo==="envio"?" sel-envio":"");
   document.getElementById("tipo-desarme").className = "tipo-btn"+(tipo==="desarme"?" sel-desarme":"");
-  // Mostrar/ocultar transportistas
-  var ts = document.getElementById("transport-section");
-  ts.className = "transport-section" + (tipo==="envio"?" visible":"");
+  document.getElementById("transport-section").className = "transport-section"+(tipo==="envio"?" visible":"");
   var btn = document.getElementById("btn-salida");
   btn.disabled = false;
   if (tipo==="envio") { btn.className="btn-submit verde"; btn.innerHTML="<span>Confirmar Envío 🚚</span>"; }
@@ -393,11 +487,7 @@ function registrarSalida() {
   if (!nombre) { mostrarToast("⚠️ Pedido no encontrado","error"); return; }
   if (!cant||parseInt(cant)<=0) { mostrarToast("⚠️ Ingresá la cantidad","error"); return; }
   var btn = document.getElementById("btn-salida"); setLoading(btn,true,"white");
-  llamar("registrarSalida",{
-    dia:dia, numCliente:num, cliente:nombre, cantidad:cant,
-    tipo:tipoSalida.toUpperCase(),
-    transporte: tipoSalida==="envio" ? transporteSeleccionado : ""
-  }).then(function(res){
+  llamar("registrarSalida",{dia:dia,numCliente:num,cliente:nombre,cantidad:cant,tipo:tipoSalida.toUpperCase(),transporte:tipoSalida==="envio"?transporteSeleccionado:""}).then(function(res){
     setLoading(btn,false);
     if(tipoSalida==="envio") btn.innerHTML="<span>Confirmar Envío 🚚</span>";
     else btn.innerHTML="<span>Confirmar Desarme 🔧</span>";
@@ -448,21 +538,58 @@ function renderInventario(rows) {
 
 function cargarHistorial() {
   document.getElementById("mov-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div>';
-  llamar("obtenerMovimientos").then(function(res){ renderHistorial(res.rows||[]); });
+  llamar("obtenerMovimientos").then(function(res){ historialData=res.rows||[]; renderHistorial(historialData); });
 }
 
 function renderHistorial(rows) {
   var list=document.getElementById("mov-list");
   if (!rows||!rows.length) { list.innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>Sin movimientos</p></div>'; return; }
-  list.innerHTML=rows.map(function(r){
+  list.innerHTML=rows.map(function(r,idx){
     var esIng=r.tipo==="INGRESO", esEnv=r.tipo==="ENVIO";
     var cls=esIng?"ing":esEnv?"env":"dsm";
     var ico=esIng?"➕":esEnv?"🚚":"🔧";
     var sig=esIng?"+":"−";
     var label=esIng?"INGRESO":esEnv?"ENVÍO":"DESARME";
     var transp = r.transporte ? " · "+r.transporte : "";
-    return '<li class="mov-item"><div class="mov-ico '+cls+'">'+ico+'</div><div class="mov-datos"><div class="mov-cliente">'+r.cliente+'</div><div class="mov-detalle">'+label+transp+' · '+r.dia+' · '+r.fecha+' · N° '+r.numCliente+'</div></div><div class="mov-cant '+cls+'">'+sig+r.cantidad+'</div></li>';
+    return '<li class="mov-item"><div class="mov-ico '+cls+'">'+ico+'</div><div class="mov-datos"><div class="mov-cliente">'+r.cliente+'</div><div class="mov-detalle">'+label+transp+' · '+r.dia+' · '+r.fecha+' · N° '+r.numCliente+'</div><button class="btn-edit-mov" onclick="abrirEditar('+idx+')">✏️ Editar</button></div><div class="mov-cant '+cls+'">'+sig+r.cantidad+'</div></li>';
   }).join("");
+}
+
+// ── EDITAR ──
+function abrirEditar(idx) {
+  var r = historialData[idx];
+  if (!r) return;
+  document.getElementById("edit-fila").value = r.fila || idx;
+  document.getElementById("edit-num").value = r.numCliente;
+  document.getElementById("edit-cliente").value = r.cliente;
+  document.getElementById("edit-cant").value = r.cantidad;
+  document.getElementById("edit-tipo").value = r.tipo;
+  // Seleccionar día
+  var sel = document.getElementById("edit-dia");
+  for (var i=0;i<sel.options.length;i++){ if(sel.options[i].value===r.dia){sel.selectedIndex=i;break;} }
+  document.getElementById("modal-editar").classList.add("open");
+}
+
+function cerrarModal() {
+  document.getElementById("modal-editar").classList.remove("open");
+}
+
+function guardarEdicion() {
+  var datos = {
+    fila: document.getElementById("edit-fila").value,
+    numCliente: document.getElementById("edit-num").value.trim(),
+    cliente: document.getElementById("edit-cliente").value.trim(),
+    cantidad: document.getElementById("edit-cant").value,
+    tipo: document.getElementById("edit-tipo").value,
+    dia: document.getElementById("edit-dia").value
+  };
+  if (!datos.numCliente||!datos.cliente||!datos.cantidad) { mostrarToast("⚠️ Completá todos los campos","error"); return; }
+  var btn = document.getElementById("btn-guardar-edit"); setLoading(btn,true,"dark");
+  llamar("editarMovimiento",datos).then(function(res){
+    setLoading(btn,false);
+    mostrarToast(res.msg||(res.ok?"✅ Guardado":"❌ Error"),res.ok?"ok":"error");
+    if(res.ok){ cerrarModal(); cargarHistorial(); cargarInventario(); }
+  });
 }
 
 function setLoading(btn,loading,spinColor){
@@ -479,6 +606,8 @@ function mostrarToast(msg,type){
   clearTimeout(toastTimer);
   toastTimer=setTimeout(function(){t.className="";},3200);
 }
+
+document.getElementById("numcli-salida").addEventListener("input", actualizarStockPreview);
 </script>
 </body>
 </html>
