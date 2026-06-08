@@ -162,13 +162,27 @@
   <div class="section-title">📦 Producto</div>
   <div class="card">
     <div class="field">
+      <label>Código</label>
+      <div class="voice-row">
+        <input type="text" id="codigo-producto" placeholder="Ej: 1083" autocomplete="off" inputmode="numeric" oninput="syncCodigo(this.value)">
+        <button class="btn-voice" onclick="startVoice('codigo-producto','Código')">🎤</button>
+      </div>
+    </div>
+    <div class="field">
       <label>Descripción del Producto</label>
       <div class="voice-row">
         <div class="autocomplete-wrap">
           <input type="text" id="producto" placeholder="Escribí, dictá o buscá..." autocomplete="off" oninput="filterProductos(this.value)" onfocus="filterProductos(this.value)">
           <div class="autocomplete-list" id="producto-list"></div>
         </div>
-        <button class="btn-voice" onclick="startVoice('producto','Producto')">🎤</button>
+        <button class="btn-voice" onclick="startVoice('producto','Descripción')">🎤</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Observación (opcional)</label>
+      <div class="voice-row">
+        <textarea id="observacion" placeholder="Escribí una observación..." rows="2" style="resize:none;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Barlow',sans-serif;font-size:1rem;padding:10px 14px;outline:none;transition:border-color .2s"></textarea>
+        <button class="btn-voice" onclick="startVoice('observacion','Observación')" style="align-self:flex-start">🎤</button>
       </div>
     </div>
   </div>
@@ -254,7 +268,8 @@
     <h2>✏️ Editar Registro <button class="btn-close-modal" onclick="closeEdit()">✕</button></h2>
     <input type="hidden" id="edit-id">
     <div class="field"><label>N° de Partida</label><input type="text" id="edit-partida" autocomplete="off"></div>
-    <div class="field"><label>Producto</label><input type="text" id="edit-producto" autocomplete="off"></div>
+    <div class="field"><label>Código</label><input type="text" id="edit-codigo" autocomplete="off" inputmode="numeric"></div>
+    <div class="field"><label>Descripción del Producto</label><input type="text" id="edit-producto" autocomplete="off"></div>
     <div class="field"><label>Persona que Ingresa</label><input type="text" id="edit-ingresa" autocomplete="off"></div>
     <div class="field"><label>Persona que Recibe</label><input type="text" id="edit-recibe" autocomplete="off"></div>
     <div class="edit-cueros">
@@ -269,6 +284,7 @@
         <option value="dep-salon">De Depósito a Salón de Ventas</option>
       </select>
     </div>
+    <div class="field"><label>Observación</label><textarea id="edit-observacion" rows="3" style="resize:none;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Barlow',sans-serif;font-size:1rem;padding:10px 14px;outline:none"></textarea></div>
     <button class="btn-save-modal" onclick="saveEdit()">💾 Guardar Cambios</button>
   </div>
 </div>
@@ -325,14 +341,15 @@ const PRODUCTOS = [
   {cod:'1045',desc:'Basto de Suela 60cm'},{cod:'1046',desc:'Basto de Suela 65cm'},
   {cod:'1050',desc:'Basto de Suela Marrón Chocolate 60cm'},{cod:'1051',desc:'Basto de Suela Marrón Chocolate 65cm'},
   {cod:'1049',desc:'Basto de Suela Marrón Chocolate 55cm'},{cod:'33',desc:'Basto Descarne 60cm'},
-  {cod:'1161',desc:'Cabeza Oferta'},{cod:'1241',desc:'Cabeza Vaqueta Blanco Clase B 3mm a 5mm'},
-  {cod:'1055',desc:'Cabeza Vaqueta Marrón Chocolate Clase B 3mm a 5mm'},
-  {cod:'1240',desc:'Cabeza Vaqueta Marrón Vino Clase B 3mm a 5mm'},
-  {cod:'244',desc:'Cabeza Vaqueta Natural Clase A 2mm a 3mm'},{cod:'44',desc:'Cabeza Vaqueta Natural Clase A 3mm a 5mm'},
-  {cod:'1105',desc:'Cabeza Vaqueta Natural Clase B 2mm a 3mm'},{cod:'105',desc:'Cabeza Vaqueta Natural Clase B 3mm a 5mm'},
-  {cod:'6666',desc:'Cabeza Vaqueta Negro Clase A 3mm a 5mm'},{cod:'1054',desc:'Cabeza Vaqueta Negro Clase B 3mm a 5mm'},
+  {cod:'1161',desc:'Cabeza Oferta'},{cod:'1241',desc:'Cabeza Vaqueta Blanco Clase B 2.5mm a 3.5mm'},
+  {cod:'1055',desc:'Cabeza Vaqueta Marrón Chocolate Clase B 2.5mm a 3.5mm'},
+  {cod:'1240',desc:'Cabeza Vaqueta Marrón Vino Clase B 2.5mm a 3.5mm'},
+  {cod:'244',desc:'Cabeza Vaqueta Natural Clase A 2.5mm a 3.5mm'},{cod:'44',desc:'Cabeza Vaqueta Natural Clase A 2.5mm a 3.5mm'},
+  {cod:'1105',desc:'Cabeza Vaqueta Natural Clase B 2.5mm a 3.5mm'},{cod:'105',desc:'Cabeza Vaqueta Natural Clase B 2.5mm a 3.5mm'},
+  {cod:'6666',desc:'Cabeza Vaqueta Negro Clase A 2.5mm a 3.5mm'},{cod:'1054',desc:'Cabeza Vaqueta Negro Clase B 2.5mm a 3.5mm'},
   {cod:'46',desc:'Cabeza Zapatero Clase A'},{cod:'101',desc:'Cabeza Zapatero Clase B'},
-  {cod:'34',desc:'Cuero Crudo Lonja'},{cod:'1171',desc:'Cueros Enteros Color Caramelo Clase B 1mm a 2mm'},
+  {cod:'34',desc:'Cuero Crudo Lonja'},
+  {cod:'1171',desc:'Cueros Enteros Color Caramelo Clase B 1mm a 2mm'},
   {cod:'1142',desc:'Cueros Enteros Color Gris Plata Clase B 1mm a 2mm'},
   {cod:'2203',desc:'Cueros Enteros Marrón Chocolate Clase B 1mm a 2mm'},
   {cod:'2204',desc:'Cueros Enteros Marrón Tabaco Clase B 1mm a 2mm'},
@@ -350,32 +367,132 @@ const PRODUCTOS = [
   {cod:'1090',desc:'Descarne Liso Natural Clase A'},{cod:'1040',desc:'Descarne Liso Natural Clase B'},
   {cod:'1234',desc:'Descarne Liso Negro Clase B'},{cod:'1227',desc:'Descarne Oferta'},
   {cod:'132',desc:'Faldas'},{cod:'133',desc:'Faldas Finas'},{cod:'1091',desc:'Grabados'},
-  {cod:'1036',desc:'Grupon Doble Blanco Clase B 3mm a 5mm'},
-  {cod:'05',desc:'Grupon Doble Color Negro Clase A 3mm a 5mm'},
-  {cod:'06',desc:'Grupon Doble Color Suela Clase A 3mm a 5mm'},
-  {cod:'1038',desc:'Grupon Doble Marrón Ambar Clase B 3mm a 5mm'},
-  {cod:'1083',desc:'Grupon Doble Marrón Chocolate Clase B 3mm a 5mm'},
-  {cod:'1098',desc:'Grupon Doble Marrón Tabaco Clase A 3mm a 5mm'},
-  {cod:'1143',desc:'Grupon Doble Marrón Tabaco Clase B 3mm a 5mm'},
-  {cod:'1035',desc:'Grupon Doble Marrón Vino Clase B 3mm a 5mm'},
-  {cod:'56',desc:'Grupon Doble Natural Clase A 3mm a 5mm'},
-  {cod:'103',desc:'Grupon Doble Natural Clase B 3mm a 5mm'},
-  {cod:'120',desc:'Grupon Doble Natural Engrasado Clase A 3mm a 5mm'},
-  {cod:'121',desc:'Grupon Doble Natural Engrasado Clase B 3mm a 5mm'},
-  {cod:'1039',desc:'Grupon Doble Negro Clase B 3mm a 5mm'},
-  {cod:'1237',desc:'Grupon Doble Oferta'},{cod:'1037',desc:'Grupon Doble Rojo Clase B 3mm a 5mm'},
-  {cod:'1034',desc:'Grupon Doble Suela Clase B 3mm a 5mm'},
+  {cod:'1036',desc:'Grupon Doble Blanco Clase B 3mm a 4mm'},
+  {cod:'2023',desc:'Grupon Doble Color Azul Clase A 3mm a 4mm'},
+  {cod:'1229',desc:'Grupon Doble Color Blando Clase A 3mm a 4mm'},
+  {cod:'07',desc:'Grupon Doble Color DS Clase A 3mm a 4mm'},
+  {cod:'09',desc:'Grupon Doble Color HB Clase A 3mm a 4mm'},
+  {cod:'08',desc:'Grupon Doble Color HBR Clase A 3mm a 4mm'},
+  {cod:'06',desc:'Grupon Doble Color Suela Clase A 3mm a 4mm'},
+  {cod:'010',desc:'Grupon Doble Color Verde Clase A 3mm a 4mm'},
+  {cod:'1038',desc:'Grupon Doble Marrón Ambar Clase B 3mm a 4mm'},
+  {cod:'1083',desc:'Grupon Doble Marrón Chocolate Clase B 3mm a 4mm'},
+  {cod:'1096',desc:'Grupon Doble Marrón Chocolate Engrasado Clase B 3mm a 4mm'},
+  {cod:'1098',desc:'Grupon Doble Marrón Tabaco Clase A 3mm a 4mm'},
+  {cod:'1143',desc:'Grupon Doble Marrón Tabaco Clase B 3mm a 4mm'},
+  {cod:'1035',desc:'Grupon Doble Marrón Vino Clase B 3mm a 4mm'},
+  {cod:'56',desc:'Grupon Doble Natural Clase A 3mm a 4mm'},
+  {cod:'103',desc:'Grupon Doble Natural Clase B 3mm a 4mm'},
+  {cod:'120',desc:'Grupon Doble Natural Engrasado Clase A 3mm a 4mm'},
+  {cod:'121',desc:'Grupon Doble Natural Engrasado Clase B 3mm a 4mm'},
+  {cod:'1039',desc:'Grupon Doble Negro Clase B 3mm a 4mm'},
+  {cod:'1069',desc:'Grupon Doble Negro Engrasado Clase A 3mm a 4mm'},
+  {cod:'1070',desc:'Grupon Doble Negro Engrasado Clase B 3mm a 4mm'},
+  {cod:'05',desc:'Grupon Doble Negro Clase A 3mm a 4mm'},
+  {cod:'1237',desc:'Grupon Doble Oferta'},
+  {cod:'1037',desc:'Grupon Doble Rojo Clase B 3mm a 4mm'},
+  {cod:'1034',desc:'Grupon Doble Suela Clase B 3mm a 4mm'},
   {cod:'58',desc:'Grupon Zapatero Clase A'},{cod:'100',desc:'Grupon Zapatero Clase B'},
   {cod:'1225',desc:'Lado Rechazo'},
+  {cod:'1067',desc:'Lados Bridge Color Azul 1mm a 2mm'},{cod:'1027',desc:'Lados Bridge Marrón Ambar 1mm a 2mm'},
+  {cod:'1068',desc:'Lados Bridge Marrón Chocolate 1mm a 2mm'},{cod:'1023',desc:'Lados Bridge Marrón Tabaco 1mm a 2mm'},
+  {cod:'1028',desc:'Lados Bridge Marrón Vino 1mm a 2mm'},{cod:'1022',desc:'Lados Bridge Negro 1mm a 2mm'},
+  {cod:'1026',desc:'Lados Bridge Rojo 1mm a 2mm'},{cod:'2001',desc:'Lados Bridge Suela 1mm a 2mm'},
+  {cod:'1223',desc:'Lados Vaqueta Blanco Clase B 1mm a 2.4mm'},
+  {cod:'1109',desc:'Lados Vaqueta Color Azul Clase A 2.5mm a 3mm'},
+  {cod:'1110',desc:'Lados Vaqueta Color Azul Clase B 2.5mm a 3mm'},
+  {cod:'1019',desc:'Lados Vaqueta Color Azul Clase B 1mm a 2.4mm'},
+  {cod:'03',desc:'Lados Vaqueta Marrón Ambar Grueso Clase A 3mm a 4mm'},
+  {cod:'3333',desc:'Lados Vaqueta Rojo Clase B 1mm a 2.4mm'},
+  {cod:'13',desc:'Lados Vaqueta Economico'},{cod:'1243',desc:'Lados Vaqueta Economico Color HB'},
+  {cod:'14',desc:'Lados Vaqueta Economico Engrasado'},
+  {cod:'1097',desc:'Lados Vaqueta Engrasado Negro Clase B 1mm a 2.4mm'},
+  {cod:'1228',desc:'Lados Vaqueta Engrasado Rojo Clase B 1mm a 2.4mm'},
+  {cod:'1062',desc:'Lados Vaqueta Marrón Ambar Clase A 1mm a 2.4mm'},
+  {cod:'1106',desc:'Lados Vaqueta Marrón Ambar Clase A 2.5mm a 3mm'},
+  {cod:'1063',desc:'Lados Vaqueta Marrón Ambar Clase B 1mm a 2.4mm'},
+  {cod:'1107',desc:'Lados Vaqueta Marrón Ambar Clase B 2.5mm a 3mm'},
+  {cod:'1013',desc:'Lados Vaqueta Marrón Ambar Grueso Clase B 3mm a 4mm'},
+  {cod:'1033',desc:'Lados Vaqueta Marrón Chocolate Clase A 1mm a 2.4mm'},
+  {cod:'1112',desc:'Lados Vaqueta Marrón Chocolate Clase A 2.5mm a 3mm'},
+  {cod:'1066',desc:'Lados Vaqueta Marrón Chocolate Clase B 1mm a 2.4mm'},
+  {cod:'1113',desc:'Lados Vaqueta Marrón Chocolate Clase B 2.5mm a 3mm'},
+  {cod:'10101',desc:'Lados Vaqueta Marrón Chocolate Engrasado Clase B 1mm a 2.4mm'},
+  {cod:'1065',desc:'Lados Vaqueta Marrón Chocolate Grueso Clase B 3mm a 4mm'},
+  {cod:'02',desc:'Lados Vaqueta Marrón Chocolate Grueso Clase A 3mm a 4mm'},
+  {cod:'19',desc:'Lados Vaqueta Marrón Tabaco Clase A 1mm a 2.4mm'},
+  {cod:'1121',desc:'Lados Vaqueta Marrón Tabaco Clase A 2.5mm a 3mm'},
+  {cod:'1122',desc:'Lados Vaqueta Marrón Tabaco Clase B 2.5mm a 3mm'},
+  {cod:'1030',desc:'Lados Vaqueta Marrón Tabaco Grueso Clase A 3mm a 4mm'},
+  {cod:'1012',desc:'Lados Vaqueta Marrón Tabaco Grueso Clase B 3mm a 4mm'},
+  {cod:'1061',desc:'Lados Vaqueta Marrón Vino Clase A 1mm a 2.4mm'},
+  {cod:'1115',desc:'Lados Vaqueta Marrón Vino Clase A 2.5mm a 3mm'},
+  {cod:'1016',desc:'Lados Vaqueta Marrón Vino Clase B 1mm a 2.4mm'},
+  {cod:'1116',desc:'Lados Vaqueta Marrón Vino Clase B 2.5mm a 3mm'},
+  {cod:'1029',desc:'Lados Vaqueta Marrón Vino Grueso Clase A 3mm a 4mm'},
+  {cod:'1009',desc:'Lados Vaqueta Marrón Vino Grueso Clase B 3mm a 4mm'},
   {cod:'69',desc:'Lados Vaqueta Natural Clase A 1mm a 2.4mm'},
+  {cod:'1133',desc:'Lados Vaqueta Natural Clase A 2.5mm a 3mm'},
+  {cod:'1242',desc:'Lados Vaqueta Natural Clase B 1mm a 2.4mm'},
   {cod:'47',desc:'Lados Vaqueta Natural Clase B 2.5mm a 3mm'},
+  {cod:'68',desc:'Lados Vaqueta Natural Engrasada Clase A 1mm a 2.4mm'},
+  {cod:'1134',desc:'Lados Vaqueta Natural Engrasada Clase A 2.5mm a 3mm'},
+  {cod:'29',desc:'Lados Vaqueta Natural Engrasada Clase B 1mm a 2.4mm'},
+  {cod:'1135',desc:'Lados Vaqueta Natural Engrasada Clase B 2.5mm a 3mm'},
+  {cod:'91',desc:'Lados Vaqueta Natural Engrasada Grueso Clase A 3mm a 4mm'},
+  {cod:'92',desc:'Lados Vaqueta Natural Engrasada Grueso Clase B 3mm a 4mm'},
+  {cod:'71',desc:'Lados Vaqueta Natural Grueso Clase A 3mm a 4mm'},
+  {cod:'109',desc:'Lados Vaqueta Natural Grueso Clase B 3mm a 4mm'},
+  {cod:'1222',desc:'Lados Vaqueta Natural Economico 2.5mm a 3mm'},
+  {cod:'1031',desc:'Lados Vaqueta Negro Clase A 1mm a 2.4mm'},
+  {cod:'1118',desc:'Lados Vaqueta Negro Clase A 2.5mm a 3mm'},
+  {cod:'1018',desc:'Lados Vaqueta Negro Clase B 1mm a 2.4mm'},
+  {cod:'1119',desc:'Lados Vaqueta Negro Clase B 2.5mm a 3mm'},
+  {cod:'1235',desc:'Lados Vaqueta Negro Engrasado Clase A 1mm a 2.4mm'},
+  {cod:'1136',desc:'Lados Vaqueta Negro Engrasado Clase A 2.5mm a 3mm'},
+  {cod:'1236',desc:'Lados Vaqueta Negro Engrasado Clase B 1mm a 2.4mm'},
+  {cod:'1137',desc:'Lados Vaqueta Negro Engrasado Clase B 2.5mm a 3mm'},
+  {cod:'01',desc:'Lados Vaqueta Negro Grueso Clase A 3mm a 4mm'},
+  {cod:'1011',desc:'Lados Vaqueta Negro Grueso Clase B 3mm a 4mm'},
   {cod:'1092',desc:'Lados Vaqueta Oferta'},
+  {cod:'4444',desc:'Lados Vaqueta Rojo Clase A 1mm a 2.4mm'},
+  {cod:'1124',desc:'Lados Vaqueta Rojo Clase A 2.5mm a 3mm'},
+  {cod:'3333',desc:'Lados Vaqueta Rojo Clase B 1mm a 2.4mm'},
+  {cod:'1125',desc:'Lados Vaqueta Rojo Clase B 2.5mm a 3mm'},
+  {cod:'1021',desc:'Lados Vaqueta Rosa Clase B 1mm a 2.4mm'},
+  {cod:'1064',desc:'Lados Vaqueta Suela Clase A 1mm a 2.4mm'},
+  {cod:'1127',desc:'Lados Vaqueta Suela Clase A 2.5mm a 3mm'},
+  {cod:'1015',desc:'Lados Vaqueta Suela Clase B 1mm a 2.4mm'},
+  {cod:'1128',desc:'Lados Vaqueta Suela Clase B 2.5mm a 3mm'},
+  {cod:'04',desc:'Lados Vaqueta Suela Grueso Clase A 3mm a 4mm'},
+  {cod:'1010',desc:'Lados Vaqueta Suela Grueso Clase B 3mm a 4mm'},
+  {cod:'1130',desc:'Lados Vaqueta Verde Clase A 2.5mm a 3mm'},
+  {cod:'1020',desc:'Lados Vaqueta Verde Clase B 1mm a 2.4mm'},
+  {cod:'1131',desc:'Lados Vaqueta Verde Clase B 2.5mm a 3mm'},
   {cod:'30',desc:'Lomillo de Suela 55cm'},{cod:'1052',desc:'Lomillo de Suela 60cm'},
-  {cod:'1053',desc:'Lomillo de Suela 65cm'},
-  {cod:'61',desc:'Suela Engrasada Natural Clase A 4mm a 6mm'},
-  {cod:'111',desc:'Suela Engrasada Natural Clase B 4mm a 6mm'},
+  {cod:'1053',desc:'Lomillo de Suela 65cm'},{cod:'4310218',desc:'Mercado Libre'},
+  {cod:'1414',desc:'Suela Engrasada Color Azul Clase B 3mm a 5mm'},
+  {cod:'1072',desc:'Suela Engrasada Marrón Chocolate Clase A 3mm a 5mm'},
+  {cod:'1079',desc:'Suela Engrasada Marrón Chocolate Clase A 3mm a 5mm'},
+  {cod:'1075',desc:'Suela Engrasada Marrón Chocolate Clase B 3mm a 5mm'},
+  {cod:'1000',desc:'Suela Engrasada Marrón Chocolate Clase B 3mm a 5mm'},
+  {cod:'1073',desc:'Suela Engrasada Marrón Vino Clase A 3mm a 5mm'},
+  {cod:'1080',desc:'Suela Engrasada Marrón Vino Clase A 3mm a 5mm'},
+  {cod:'1076',desc:'Suela Engrasada Marrón Vino Clase B 3mm a 5mm'},
+  {cod:'1003',desc:'Suela Engrasada Marrón Vino Clase B 3mm a 5mm'},
+  {cod:'102',desc:'Suela Engrasada Natural Clase A 3mm a 5mm'},
+  {cod:'61',desc:'Suela Engrasada Natural Clase A 3mm a 5mm'},
+  {cod:'1093',desc:'Suela Engrasada Natural Clase B 3mm a 5mm'},
+  {cod:'111',desc:'Suela Engrasada Natural Clase B 3mm a 5mm'},
+  {cod:'1074',desc:'Suela Engrasada Negro Clase A 3mm a 5mm'},
+  {cod:'1077',desc:'Suela Engrasada Negro Clase B 3mm a 5mm'},
+  {cod:'1081',desc:'Suela Engrasada Negro Clase B 3mm a 5mm'},
+  {cod:'011',desc:'Suela Engrasada Negro Clase A 3mm a 5mm'},
   {cod:'1239',desc:'Suela Engrasada Oferta'},
-  {cod:'15',desc:'Suela Engrasada Rojo Clase B 4mm a 6mm'}
+  {cod:'1071',desc:'Suela Engrasada Rojo Clase A 3mm a 5mm'},
+  {cod:'1082',desc:'Suela Engrasada Rojo Clase A 3mm a 5mm'},
+  {cod:'1078',desc:'Suela Engrasada Rojo Clase B 3mm a 5mm'},
+  {cod:'15',desc:'Suela Engrasada Rojo Clase B 3mm a 5mm'}
 ];
 
 function filterProductos(query) {
@@ -396,8 +513,21 @@ function filterProductos(query) {
   list.classList.add('open');
 }
 
-function selectProducto(cod,desc){
-  document.getElementById('producto').value=`[${cod}] ${desc}`;
+function syncCodigo(val) {
+  // When user types a code, search and autofill description
+  const q = val.trim().toLowerCase();
+  const match = PRODUCTOS.find(p => p.cod.toLowerCase() === q);
+  if (match) {
+    document.getElementById('producto').value = `${match.cod} - ${match.desc}`;
+    document.getElementById('producto-list').classList.remove('open');
+  } else {
+    filterProductos(val);
+  }
+}
+
+function selectProducto(cod, desc) {
+  document.getElementById('producto').value = `${cod} - ${desc}`;
+  document.getElementById('codigo-producto').value = cod;
   document.getElementById('producto-list').classList.remove('open');
 }
 
@@ -462,7 +592,11 @@ async function submitForm(){
   btn.disabled=true;btn.textContent='Enviando...';
   updateSyncStatus('syncing');
 
-  const record={id:Date.now(),partida,producto,ingresa,recibe,cuerosA,cuerosB,cuerosC,destino:destinoSelected,fecha:new Date().toISOString(),modificado:false};
+  const record={id:Date.now(),partida,
+    codigo:document.getElementById('codigo-producto').value.trim(),
+    producto,ingresa,recibe,cuerosA,cuerosB,cuerosC,
+    destino:destinoSelected,observacion:document.getElementById('observacion').value.trim(),
+    fecha:new Date().toISOString(),modificado:false};
 
   try{
     const res=await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(record)});
@@ -483,12 +617,14 @@ async function submitForm(){
 
 function resetForm(){
   document.getElementById('partida').value='';
+  document.getElementById('codigo-producto').value='';
   document.getElementById('producto').value='';
   document.getElementById('persona-ingresa').value='';
   document.getElementById('persona-recibe').value='';
   document.getElementById('cueros-a').value='0';
   document.getElementById('cueros-b').value='0';
   document.getElementById('cueros-c').value='0';
+  document.getElementById('observacion').value='';
   destinoSelected=null;
   document.getElementById('btn-salon').className='destino-btn';
   document.getElementById('btn-deposito').className='destino-btn';
@@ -551,6 +687,7 @@ function renderRecords(filter){
         <div class="cuero-chip b">B: ${r.cuerosB||0}</div>
         <div class="cuero-chip c">C: ${r.cuerosC||0}</div>
       </div>
+      ${r.observacion?`<div style="font-size:.78rem;color:var(--muted);margin-bottom:5px;font-style:italic">📝 ${r.observacion}</div>`:''}
       <div class="record-footer">
         <div class="record-time">📅 ${formatDate(r.fecha)} ${r.modificado?'✏️':''}</div>
         <div class="record-actions">
@@ -616,6 +753,7 @@ function openEdit(id){
   if(!r) return;
   document.getElementById('edit-id').value=id;
   document.getElementById('edit-partida').value=r.partida||'';
+  document.getElementById('edit-codigo').value=r.codigo||'';
   document.getElementById('edit-producto').value=r.producto||'';
   document.getElementById('edit-ingresa').value=r.ingresa||'';
   document.getElementById('edit-recibe').value=r.recibe||'';
@@ -623,6 +761,7 @@ function openEdit(id){
   document.getElementById('edit-cueros-b').value=r.cuerosB||0;
   document.getElementById('edit-cueros-c').value=r.cuerosC||0;
   document.getElementById('edit-destino').value=r.destino||'salon';
+  document.getElementById('edit-observacion').value=r.observacion||'';
   document.getElementById('edit-modal').classList.add('open');
 }
 function closeEdit(){document.getElementById('edit-modal').classList.remove('open');}
@@ -636,11 +775,13 @@ async function saveEdit(){
   const updated={
     id:parseInt(id),
     partida:document.getElementById('edit-partida').value.trim(),
+    codigo:document.getElementById('edit-codigo').value.trim(),
     producto:document.getElementById('edit-producto').value.trim(),
     ingresa:document.getElementById('edit-ingresa').value.trim(),
     recibe:document.getElementById('edit-recibe').value.trim(),
     cuerosA,cuerosB,cuerosC,
     destino:document.getElementById('edit-destino').value,
+    observacion:document.getElementById('edit-observacion').value.trim(),
     modificado:true,
     fechaModificacion:new Date().toISOString()
   };
