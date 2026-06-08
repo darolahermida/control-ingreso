@@ -3,137 +3,135 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Control de Ingreso — Salón de Acondicionamiento</title>
+<title>Control de Ingreso</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap');
-  :root {
-    --bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;
-    --accent:#f0a500;--accent2:#e05c00;--green:#2ea043;--red:#da3633;
-    --blue:#388bfd;--purple:#a371f7;--text:#e6edf3;--muted:#7d8590;--radius:10px;
-  }
+  :root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;--accent:#f0a500;--accent2:#e05c00;--green:#2ea043;--red:#da3633;--blue:#388bfd;--purple:#a371f7;--orange:#e05c00;--text:#e6edf3;--muted:#7d8590;--radius:10px}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100dvh;overflow-x:hidden}
-  header{background:var(--surface);border-bottom:2px solid var(--accent);padding:14px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
-  .logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-  header h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;text-transform:uppercase;letter-spacing:.05em;line-height:1.2;flex:1}
-  header h1 span{display:block;font-size:.75rem;font-weight:400;letter-spacing:.1em;color:var(--muted)}
+  header{background:var(--surface);border-bottom:2px solid var(--accent);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+  .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  header h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;line-height:1.2;flex:1}
+  header h1 span{display:block;font-size:.7rem;font-weight:400;color:var(--muted)}
   .sync-status{display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--muted);flex-shrink:0}
   .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s}
   .sync-dot.ok{background:var(--green)}.sync-dot.error{background:var(--red)}.sync-dot.syncing{background:var(--accent);animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
   .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);overflow-x:auto;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
-  .tab{flex:1;padding:13px 10px;border:none;background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+  .tab{flex:1;padding:12px 8px;border:none;background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
   .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-  .page{display:none;padding:20px}.page.active{display:block}
-  .section-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .page{display:none;padding:16px}.page.active{display:block}
+  .section-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px}
   .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
-  .field{margin-bottom:14px}.field:last-child{margin-bottom:0}
-  label{display:block;font-size:.75rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-  input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Barlow',sans-serif;font-size:1rem;padding:11px 14px;outline:none;transition:border-color .2s}
-  input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+  .field{margin-bottom:12px}.field:last-child{margin-bottom:0}
+  label{display:block;font-size:.72rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+  input,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Barlow',sans-serif;font-size:1rem;padding:10px 14px;outline:none;transition:border-color .2s}
+  input:focus,select:focus{border-color:var(--accent)}
   select option{background:var(--surface)}
-  .scan-row{display:flex;gap:10px}.scan-row input{flex:1}
-  .btn-scan{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:7px;color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;padding:0 16px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0}
-  .destino-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .destino-btn{background:var(--bg);border:2px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;padding:18px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;transition:all .2s}
-  .destino-btn .icon{font-size:2rem}
-  .destino-btn.selected-salon{background:rgba(56,139,253,.12);border-color:var(--blue);color:var(--blue)}
-  .destino-btn.selected-deposito{background:rgba(46,160,67,.12);border-color:var(--green);color:var(--green)}
+  .scan-row{display:flex;gap:8px}.scan-row input{flex:1}
+  .btn-scan{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:7px;color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;padding:0 14px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0}
+  .voice-row{display:flex;gap:8px}.voice-row>*:first-child{flex:1}
+  .btn-voice{background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:1.1rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+  .btn-voice.listening{background:rgba(218,54,51,.2);border-color:var(--red);color:var(--red);animation:pulse 1s infinite}
+  .destino-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .destino-btn{background:var(--bg);border:2px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;padding:14px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s;line-height:1.2;text-align:center}
+  .destino-btn .icon{font-size:1.6rem}
+  .destino-btn.sel-salon{background:rgba(56,139,253,.12);border-color:var(--blue);color:var(--blue)}
+  .destino-btn.sel-deposito{background:rgba(46,160,67,.12);border-color:var(--green);color:var(--green)}
+  .destino-btn.sel-dep-salon{background:rgba(163,113,247,.12);border-color:var(--purple);color:var(--purple)}
   .cueros-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-  .cuero-field{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:5px}
-  .cuero-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.05em}
+  .cuero-field{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .cuero-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.05em}
   .cuero-label.a{color:var(--accent)}.cuero-label.b{color:var(--blue)}.cuero-label.c{color:var(--purple)}
   .cuero-field input{background:transparent;border:none;border-bottom:2px solid var(--border);border-radius:0;text-align:center;font-size:1.4rem;font-weight:700;color:var(--text);padding:4px 0;width:100%}
   .cuero-field input:focus{border-bottom-color:var(--accent)}
-  .cuero-field small{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;text-align:center}
-  .btn-submit{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--radius);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;text-transform:uppercase;letter-spacing:.1em;padding:18px;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:8px}
+  .cuero-field small{font-size:.62rem;color:var(--muted);text-transform:uppercase}
+  .btn-submit{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--radius);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;text-transform:uppercase;letter-spacing:.1em;padding:16px;cursor:pointer;margin-top:6px}
   .btn-submit:active{opacity:.85;transform:scale(.98)}
-  .pending-banner{background:rgba(218,54,51,.1);border:1px solid var(--red);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .pending-banner span{font-size:.82rem;color:var(--text)}
-  .btn-retry{background:var(--red);border:none;border-radius:6px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;padding:6px 12px;cursor:pointer;flex-shrink:0}
-  .config-banner{background:rgba(240,165,0,.1);border:1px solid var(--accent);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
-  .config-banner .icon{font-size:1.3rem;flex-shrink:0;margin-top:2px}
-  .config-banner p{font-size:.82rem;color:var(--text);line-height:1.5}
-  .config-banner a{color:var(--accent);text-decoration:underline}
-  .webhook-row{display:flex;gap:8px;align-items:flex-end}
-  .webhook-row .field{flex:1;margin:0}
-  .btn-save-webhook{background:var(--green);border:none;border-radius:7px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;padding:11px 16px;cursor:pointer;flex-shrink:0;white-space:nowrap}
+  .autocomplete-wrap{position:relative;flex:1}
+  .autocomplete-list{position:fixed;background:var(--surface);border:1px solid var(--accent);border-radius:8px;max-height:220px;overflow-y:auto;z-index:999;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5);width:calc(100vw - 40px)}
+  .autocomplete-list.open{display:block}
+  .autocomplete-item{padding:11px 14px;font-size:.9rem;cursor:pointer;border-bottom:1px solid var(--border);line-height:1.3}
+  .autocomplete-item:last-child{border-bottom:none}
+  .autocomplete-item:active{background:rgba(240,165,0,.15);color:var(--accent)}
+  .autocomplete-item small{display:block;font-size:.7rem;color:var(--muted);margin-top:2px}
+  .filters{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;padding:6px 14px;cursor:pointer;white-space:nowrap;transition:all .2s}
+  .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
+  .record-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;margin-bottom:10px;position:relative;overflow:hidden}
+  .record-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+  .record-card.salon::before{background:var(--blue)}
+  .record-card.deposito::before{background:var(--green)}
+  .record-card.dep-salon::before{background:var(--purple)}
+  .record-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px}
+  .record-partida{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;color:var(--accent)}
+  .record-badge{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;text-transform:uppercase;padding:3px 9px;border-radius:20px;flex-shrink:0}
+  .record-badge.salon{background:rgba(56,139,253,.15);color:var(--blue)}
+  .record-badge.deposito{background:rgba(46,160,67,.15);color:var(--green)}
+  .record-badge.dep-salon{background:rgba(163,113,247,.15);color:var(--purple)}
+  .record-names{font-size:.82rem;color:var(--text);margin-bottom:5px}
+  .record-names span{color:var(--muted);font-size:.75rem}
+  .record-producto{font-size:.8rem;color:var(--text);margin-bottom:6px}
+  .record-producto span{color:var(--muted);font-size:.74rem}
+  .record-cueros{display:flex;gap:7px;margin-bottom:6px;flex-wrap:wrap}
+  .cuero-chip{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;padding:3px 9px;border-radius:6px}
+  .cuero-chip.a{background:rgba(240,165,0,.15);color:var(--accent)}
+  .cuero-chip.b{background:rgba(56,139,253,.15);color:var(--blue)}
+  .cuero-chip.c{background:rgba(163,113,247,.15);color:var(--purple)}
+  .record-footer{display:flex;justify-content:space-between;align-items:center}
+  .record-time{font-size:.7rem;color:var(--muted)}
+  .record-actions{display:flex;gap:6px}
+  .btn-edit-rec{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;text-transform:uppercase;padding:4px 10px;cursor:pointer}
+  .btn-delete-rec{background:rgba(218,54,51,.1);border:1px solid rgba(218,54,51,.3);border-radius:6px;color:var(--red);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;text-transform:uppercase;padding:4px 10px;cursor:pointer}
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+  .stat-num{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2rem;line-height:1;margin-bottom:3px}
+  .stat-num.accent{color:var(--accent)}.stat-num.blue{color:var(--blue)}.stat-num.green{color:var(--green)}.stat-num.purple{color:var(--purple)}
+  .stat-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .empty-state{text-align:center;padding:36px 20px;color:var(--muted)}
+  .empty-state .icon{font-size:2.5rem;margin-bottom:10px}
+  .empty-state p{font-size:.88rem}
+  .loading{text-align:center;padding:30px;color:var(--muted);font-size:.9rem}
+  #edit-modal,#delete-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:flex-end;justify-content:center}
+  #edit-modal.open,#delete-modal.open{display:flex}
+  .modal-sheet{background:var(--surface);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:22px 18px 34px;width:100%;max-height:90dvh;overflow-y:auto;animation:slideup .25s ease}
+  @keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal-sheet h2{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+  .btn-close-modal{background:var(--surface2);border:1px solid var(--border);border-radius:50%;color:var(--muted);width:30px;height:30px;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .edit-cueros{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+  .btn-save-modal{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--radius);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;text-transform:uppercase;padding:14px;cursor:pointer;margin-top:4px}
+  .btn-confirm-delete{width:100%;background:var(--red);border:none;border-radius:var(--radius);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;text-transform:uppercase;padding:14px;cursor:pointer;margin-top:10px}
+  .delete-info{font-size:.9rem;color:var(--text);line-height:1.6;margin-bottom:4px}
   #scanner-modal{display:none;position:fixed;inset:0;background:#000;z-index:999;flex-direction:column}
   #scanner-modal.open{display:flex}
-  .scanner-header{background:rgba(0,0,0,.7);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:absolute;top:0;left:0;right:0;z-index:10}
-  .scanner-header span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;text-transform:uppercase;color:var(--accent);letter-spacing:.08em}
-  .btn-close-scan{background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.4rem;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .scanner-header{background:rgba(0,0,0,.7);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:absolute;top:0;left:0;right:0;z-index:10}
+  .scanner-header span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;color:var(--accent)}
+  .btn-close-scan{background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.3rem;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
   #scanner-viewport{flex:1;position:relative;overflow:hidden}
   #scanner-viewport video,#scanner-viewport canvas{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover}
   .scan-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5}
-  .scan-frame{width:min(80vw,320px);height:140px;border:3px solid var(--accent);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);position:relative}
-  .scan-line{position:absolute;left:8px;right:8px;top:50%;height:2px;background:var(--accent);opacity:.8;animation:scanline 1.8s ease-in-out infinite}
+  .scan-frame{width:min(80vw,300px);height:130px;border:3px solid var(--accent);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);position:relative}
+  .scan-line{position:absolute;left:8px;right:8px;height:2px;background:var(--accent);opacity:.8;animation:scanline 1.8s ease-in-out infinite}
   @keyframes scanline{0%,100%{top:20%;opacity:1}50%{top:80%;opacity:.5}}
-  .scan-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;color:#fff;font-size:.85rem;opacity:.8}
-  .scan-success-flash{position:fixed;inset:0;background:rgba(46,160,67,.4);z-index:1000;display:none;animation:flash .4s ease;pointer-events:none}
-  @keyframes flash{0%{opacity:1}100%{opacity:0}}
-  .filters{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
-  .filters::-webkit-scrollbar{display:none}
-  .filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;padding:7px 16px;cursor:pointer;white-space:nowrap;transition:all .2s}
-  .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
-  .record-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden}
-  .record-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
-  .record-card.salon::before{background:var(--blue)}.record-card.deposito::before{background:var(--green)}
-  .record-card.pending::after{content:'⏳ Pendiente';position:absolute;top:10px;right:10px;background:rgba(218,54,51,.15);color:var(--red);font-size:.65rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:10px}
-  .record-card.modified::after{content:'✏️ Modificado';position:absolute;top:10px;right:10px;background:rgba(163,113,247,.15);color:var(--purple);font-size:.65rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:10px}
-  .record-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px}
-  .record-partida{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.3rem;color:var(--accent)}
-  .record-badge{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border-radius:20px;flex-shrink:0}
-  .record-badge.salon{background:rgba(56,139,253,.15);color:var(--blue)}.record-badge.deposito{background:rgba(46,160,67,.15);color:var(--green)}
-  .record-names{font-size:.85rem;color:var(--text);margin-bottom:6px}
-  .record-names span{color:var(--muted);font-size:.78rem}
-  .record-producto{font-size:.82rem;color:var(--text);margin-bottom:8px}
-  .record-producto span{color:var(--muted);font-size:.78rem}
-  .record-cueros{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap}
-  .cuero-chip{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;padding:4px 10px;border-radius:6px}
-  .cuero-chip.a{background:rgba(240,165,0,.15);color:var(--accent)}.cuero-chip.b{background:rgba(56,139,253,.15);color:var(--blue)}.cuero-chip.c{background:rgba(163,113,247,.15);color:var(--purple)}
-  .record-time{font-size:.72rem;color:var(--muted)}
-  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
-  .stat-num{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2.2rem;line-height:1;margin-bottom:4px}
-  .stat-num.accent{color:var(--accent)}.stat-num.blue{color:var(--blue)}.stat-num.green{color:var(--green)}.stat-num.purple{color:var(--purple)}
-  .stat-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-  .empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
-  .empty-state .icon{font-size:3rem;margin-bottom:12px}
-  .empty-state p{font-size:.9rem}
-  #edit-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:flex-end;justify-content:center}
-  #edit-modal.open{display:flex}
-  .edit-sheet{background:var(--surface);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:24px 20px 36px;width:100%;max-height:90dvh;overflow-y:auto;animation:slideup .25s ease}
-  @keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
-  .edit-sheet h2{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
-  .btn-close-edit{background:var(--surface2);border:1px solid var(--border);border-radius:50%;color:var(--muted);width:32px;height:32px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .edit-cueros{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
-  .btn-save-edit{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--radius);color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;text-transform:uppercase;letter-spacing:.08em;padding:16px;cursor:pointer;margin-top:6px}
-  .btn-edit{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:5px 12px;cursor:pointer;margin-top:8px}
-  #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.05em;padding:14px 28px;border-radius:30px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+  .scan-hint{position:absolute;bottom:36px;left:0;right:0;text-align:center;color:#fff;font-size:.82rem;opacity:.8}
+  .scan-flash{position:fixed;inset:0;background:rgba(46,160,67,.4);z-index:1000;display:none;pointer-events:none}
+  #voice-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:800;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+  #voice-overlay.open{display:flex}
+  .voice-circle{width:90px;height:90px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:2.5rem;animation:vpulse 1s ease-in-out infinite}
+  @keyframes vpulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(218,54,51,.4)}50%{transform:scale(1.1);box-shadow:0 0 0 18px rgba(218,54,51,0)}}
+  .voice-label{color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.2rem;text-transform:uppercase;letter-spacing:.1em}
+  .voice-transcript{color:var(--accent);font-size:1rem;font-style:italic;max-width:80vw;text-align:center;min-height:28px}
+  .btn-cancel-voice{background:var(--surface);border:1px solid var(--border);border-radius:30px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.88rem;padding:11px 26px;cursor:pointer}
+  #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;padding:12px 26px;border-radius:30px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:92vw;text-align:center}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   #toast.error{background:var(--red)}#toast.warn{background:#7d5c00}
-  .voice-row{display:flex;gap:8px}.voice-row input{flex:1}
-  .btn-voice{background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:1.2rem;width:46px;height:46px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s}
-  .btn-voice.listening{background:rgba(218,54,51,.2);border-color:var(--red);color:var(--red);animation:pulse 1s infinite}
-  .btn-voice:active{opacity:.8}
-  .autocomplete-wrap{position:relative;flex:1}
-  .autocomplete-list{position:fixed;background:var(--surface);border:1px solid var(--accent);border-radius:8px;max-height:220px;overflow-y:auto;z-index:999;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.5);width:calc(100vw - 40px)}
-  .autocomplete-list.open{display:block}
-  .autocomplete-item{padding:12px 14px;font-size:.92rem;cursor:pointer;border-bottom:1px solid var(--border);line-height:1.3}
-  .autocomplete-item:last-child{border-bottom:none}
-  .autocomplete-item:active{background:rgba(240,165,0,.15);color:var(--accent)}
-  .autocomplete-item small{display:block;font-size:.72rem;color:var(--muted);margin-top:2px}
-  #voice-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:800;flex-direction:column;align-items:center;justify-content:center;gap:20px}
-  #voice-overlay.open{display:flex}
-  .voice-circle{width:100px;height:100px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:3rem;animation:voicepulse 1s ease-in-out infinite}
-  @keyframes voicepulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(218,54,51,.4)}50%{transform:scale(1.1);box-shadow:0 0 0 20px rgba(218,54,51,0)}}
-  .voice-label{color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.3rem;text-transform:uppercase;letter-spacing:.1em}
-  .voice-transcript{color:var(--accent);font-size:1.1rem;font-style:italic;max-width:80vw;text-align:center;min-height:30px}
-  .btn-cancel-voice{background:var(--surface);border:1px solid var(--border);border-radius:30px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;padding:12px 28px;cursor:pointer;margin-top:10px}
+  .refresh-btn{background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:5px}
+  .refresh-btn.spinning{animation:spin 1s linear infinite}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -143,25 +141,20 @@
   <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">—</span></div>
 </header>
 <div class="tabs">
-  <button class="tab active" onclick="showPage('form',this)">📋 Nuevo</button>
+  <button class="tab active" onclick="showPage('form',this)">➕ Nuevo</button>
   <button class="tab" onclick="showPage('registros',this)">📂 Registros</button>
   <button class="tab" onclick="showPage('stats',this)">📊 Estadísticas</button>
-  <button class="tab" onclick="showPage('config',this)">⚙️ Config</button>
 </div>
 
 <!-- FORMULARIO -->
 <div class="page active" id="page-form">
-  <div id="pending-banner" style="display:none" class="pending-banner">
-    <span id="pending-text"></span>
-    <button class="btn-retry" onclick="retryPending()">↻ Reintentar</button>
-  </div>
   <div class="section-title">🔍 Identificación</div>
   <div class="card">
     <div class="field">
       <label>N° de Partida</label>
       <div class="scan-row">
         <input type="text" id="partida" placeholder="Escanear, dictar o ingresar..." autocomplete="off">
-        <button class="btn-voice" onclick="startVoice('partida','N° de Partida')" title="Dictar">🎤</button>
+        <button class="btn-voice" onclick="startVoice('partida','N° de Partida')">🎤</button>
         <button class="btn-scan" onclick="openScanner()">📷</button>
       </div>
     </div>
@@ -175,7 +168,7 @@
           <input type="text" id="producto" placeholder="Escribí, dictá o buscá..." autocomplete="off" oninput="filterProductos(this.value)" onfocus="filterProductos(this.value)">
           <div class="autocomplete-list" id="producto-list"></div>
         </div>
-        <button class="btn-voice" onclick="startVoice('producto','Producto')" title="Dictar">🎤</button>
+        <button class="btn-voice" onclick="startVoice('producto','Producto')">🎤</button>
       </div>
     </div>
   </div>
@@ -185,14 +178,14 @@
       <label>Persona que Ingresa</label>
       <div class="voice-row">
         <input type="text" id="persona-ingresa" placeholder="Nombre completo..." autocomplete="off">
-        <button class="btn-voice" onclick="startVoice('persona-ingresa','Persona que Ingresa')" title="Dictar">🎤</button>
+        <button class="btn-voice" onclick="startVoice('persona-ingresa','Persona que Ingresa')">🎤</button>
       </div>
     </div>
     <div class="field">
       <label>Persona que Recibe</label>
       <div class="voice-row">
         <input type="text" id="persona-recibe" placeholder="Nombre completo..." autocomplete="off">
-        <button class="btn-voice" onclick="startVoice('persona-recibe','Persona que Recibe')" title="Dictar">🎤</button>
+        <button class="btn-voice" onclick="startVoice('persona-recibe','Persona que Recibe')">🎤</button>
       </div>
     </div>
   </div>
@@ -218,27 +211,33 @@
   </div>
   <div class="section-title">🏠 Destino</div>
   <div class="card">
-    <div class="destino-row">
+    <div class="destino-grid">
       <button class="destino-btn" id="btn-salon" onclick="selectDestino('salon')">
         <span class="icon">🛍️</span>Salón de Ventas
       </button>
       <button class="destino-btn" id="btn-deposito" onclick="selectDestino('deposito')">
         <span class="icon">📦</span>Depósito de Ventas
       </button>
+      <button class="destino-btn" id="btn-dep-salon" onclick="selectDestino('dep-salon')" style="grid-column:span 2">
+        <span class="icon">🔄</span>De Depósito a Salón de Ventas
+      </button>
     </div>
   </div>
-  <button class="btn-submit" onclick="submitForm()">✅ Registrar Ingreso</button>
+  <button class="btn-submit" id="btn-submit" onclick="submitForm()">✅ Registrar Ingreso</button>
 </div>
 
 <!-- REGISTROS -->
 <div class="page" id="page-registros">
-  <div class="filters">
-    <button class="filter-btn active" onclick="filterRecords('todos',this)">Todos</button>
-    <button class="filter-btn" onclick="filterRecords('salon',this)">Salón</button>
-    <button class="filter-btn" onclick="filterRecords('deposito',this)">Depósito</button>
-    <button class="filter-btn" onclick="filterRecords('pending',this)">⏳ Pendientes</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="filters" style="margin:0;flex:1">
+      <button class="filter-btn active" onclick="filterRecords('todos',this)">Todos</button>
+      <button class="filter-btn" onclick="filterRecords('salon',this)">Salón</button>
+      <button class="filter-btn" onclick="filterRecords('deposito',this)">Depósito</button>
+      <button class="filter-btn" onclick="filterRecords('dep-salon',this)">Dep→Salón</button>
+    </div>
+    <button class="refresh-btn" id="refresh-btn" onclick="loadRecords()" style="margin-left:8px;flex-shrink:0">↻</button>
   </div>
-  <div id="records-list"></div>
+  <div id="records-list"><div class="loading">Cargando registros...</div></div>
 </div>
 
 <!-- ESTADÍSTICAS -->
@@ -249,49 +248,10 @@
   <div id="stats-partidas"></div>
 </div>
 
-<!-- CONFIG -->
-<div class="page" id="page-config">
-  <div class="section-title">🔗 Google Sheets</div>
-  <div class="config-banner">
-    <div class="icon">ℹ️</div>
-    <p>
-      Planilla: <a href="https://docs.google.com/spreadsheets/d/1dQ8zZjm0tvG6GONfNFNs_uHuT_Re-wPAUC7FWXrBcgY" target="_blank">Control de Ingreso ↗</a><br><br>
-      <strong>Actualizá el Apps Script</strong> con el nuevo código (incluye columna Producto, Clase C y columna Modificado).<br>
-      Copiá el código, pegalo en Apps Script y volvé a implementar.
-    </p>
-  </div>
-  <div class="card">
-    <div class="field">
-      <label>Código para Apps Script</label>
-      <textarea id="apps-script-code" readonly style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:monospace;font-size:.72rem;padding:12px;min-height:180px;resize:none;outline:none;line-height:1.5"></textarea>
-    </div>
-    <button onclick="copyScript()" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;padding:10px 18px;cursor:pointer;width:100%">📋 Copiar Código</button>
-  </div>
-  <div class="card">
-    <div class="field">
-      <label>URL del Web App</label>
-      <div class="webhook-row">
-        <div class="field"><input type="url" id="webhook-url" placeholder="https://script.google.com/macros/s/..." autocomplete="off"></div>
-        <button class="btn-save-webhook" onclick="saveWebhook()">💾 Guardar</button>
-      </div>
-    </div>
-    <div id="webhook-test-result" style="margin-top:10px;font-size:.8rem;color:var(--muted);display:none"></div>
-  </div>
-  <div class="card">
-    <div style="font-size:.82rem;color:var(--muted);line-height:1.6">
-      <strong style="color:var(--text)">Estado</strong><br>
-      Registros locales: <span id="cfg-local-count" style="color:var(--accent)">0</span><br>
-      Pendientes: <span id="cfg-pending-count" style="color:var(--red)">0</span><br>
-      Webhook: <span id="cfg-webhook-status">No</span>
-    </div>
-    <button onclick="testWebhook()" style="margin-top:12px;background:var(--blue);border:none;border-radius:7px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;padding:10px 18px;cursor:pointer;width:100%">🧪 Probar Conexión</button>
-  </div>
-</div>
-
 <!-- EDIT MODAL -->
 <div id="edit-modal">
-  <div class="edit-sheet">
-    <h2>✏️ Editar Registro <button class="btn-close-edit" onclick="closeEdit()">✕</button></h2>
+  <div class="modal-sheet">
+    <h2>✏️ Editar Registro <button class="btn-close-modal" onclick="closeEdit()">✕</button></h2>
     <input type="hidden" id="edit-id">
     <div class="field"><label>N° de Partida</label><input type="text" id="edit-partida" autocomplete="off"></div>
     <div class="field"><label>Producto</label><input type="text" id="edit-producto" autocomplete="off"></div>
@@ -306,16 +266,29 @@
       <select id="edit-destino">
         <option value="salon">Salón de Ventas</option>
         <option value="deposito">Depósito de Ventas</option>
+        <option value="dep-salon">De Depósito a Salón de Ventas</option>
       </select>
     </div>
-    <button class="btn-save-edit" onclick="saveEdit()">💾 Guardar Cambios</button>
+    <button class="btn-save-modal" onclick="saveEdit()">💾 Guardar Cambios</button>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div id="delete-modal">
+  <div class="modal-sheet">
+    <h2>🗑️ Eliminar Registro <button class="btn-close-modal" onclick="closeDelete()">✕</button></h2>
+    <input type="hidden" id="delete-id">
+    <div class="delete-info" id="delete-info"></div>
+    <p style="font-size:.82rem;color:var(--red);margin-top:10px">⚠️ Esta acción no se puede deshacer. Se eliminará también de Google Sheets.</p>
+    <button class="btn-confirm-delete" onclick="confirmDelete()">🗑️ Eliminar Definitivamente</button>
+    <button onclick="closeDelete()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;padding:12px;cursor:pointer;margin-top:8px">Cancelar</button>
   </div>
 </div>
 
 <!-- SCANNER -->
 <div id="scanner-modal">
   <div class="scanner-header">
-    <span>📷 Escanear Código de Barras</span>
+    <span>📷 Escanear Código</span>
     <button class="btn-close-scan" onclick="closeScanner()">✕</button>
   </div>
   <div id="scanner-viewport">
@@ -323,7 +296,8 @@
     <p class="scan-hint">Apuntá la cámara al código de barras</p>
   </div>
 </div>
-<!-- VOICE OVERLAY -->
+
+<!-- VOICE -->
 <div id="voice-overlay">
   <div class="voice-circle">🎤</div>
   <div class="voice-label" id="voice-field-label">Escuchando...</div>
@@ -331,427 +305,19 @@
   <button class="btn-cancel-voice" onclick="stopVoice(false)">✕ Cancelar</button>
 </div>
 
-<div class="scan-success-flash" id="scan-flash"></div>
+<div class="scan-flash" id="scan-flash"></div>
 <div id="toast"></div>
 
 <script>
-let records = JSON.parse(localStorage.getItem('ingresos_v3')||'[]');
-let pendingQueue = JSON.parse(localStorage.getItem('ingresos_pending')||'[]');
+const WEBHOOK = 'https://script.google.com/macros/s/AKfycbwdJPKFLBbg8gTGp9DYzfsLVTTqe__OrBi-VdOc6eXGeKw4k4HQf76KfqEvsaKSxkcplw/exec';
+let allRecords = [];
+let currentFilter = 'todos';
 let destinoSelected = null;
 let scannerActive = false;
-let webhookUrl = localStorage.getItem('webhook_url')||'';
-
-const APPS_SCRIPT_CODE = `function doPost(e) {
-  try {
-    var ss = SpreadsheetApp.openById('1dQ8zZjm0tvG6GONfNFNs_uHuT_Re-wPAUC7FWXrBcgY');
-    var sheet = ss.getActiveSheet();
-    var data = JSON.parse(e.postData.contents);
-    
-    var headers = ['ID','Fecha','Hora','N° Partida','Producto',
-      'Persona que Ingresa','Persona que Recibe',
-      'Cueros Clase A','Cueros Clase B','Cueros Clase C',
-      'Total Cueros','Destino','Modificado','Fecha Modificación'];
-    
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(headers);
-      sheet.getRange(1,1,1,headers.length).setFontWeight('bold').setBackground('#f0a500');
-    }
-    
-    var d = new Date(data.fecha);
-    var fecha = Utilities.formatDate(d, Session.getScriptTimeZone(), 'dd/MM/yyyy');
-    var hora = Utilities.formatDate(d, Session.getScriptTimeZone(), 'HH:mm:ss');
-    var destino = data.destino === 'salon' ? 'Salón de Ventas' : 'Depósito de Ventas';
-    var total = (data.cuerosA||0) + (data.cuerosB||0) + (data.cuerosC||0);
-    
-    // Si es modificación, buscar fila existente
-    if (data.modificado) {
-      var lastRow = sheet.getLastRow();
-      var ids = sheet.getRange(2,1,lastRow-1,1).getValues();
-      for (var i = 0; i < ids.length; i++) {
-        if (String(ids[i][0]) === String(data.id)) {
-          var rowNum = i + 2;
-          var fechaMod = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm');
-          sheet.getRange(rowNum, 1, 1, headers.length).setValues([[
-            data.id, fecha, hora, data.partida, data.producto||'',
-            data.ingresa, data.recibe,
-            data.cuerosA||0, data.cuerosB||0, data.cuerosC||0,
-            total, destino, 'SI', fechaMod
-          ]]);
-          sheet.getRange(rowNum, 1, 1, headers.length).setBackground('#fff3cd');
-          return ContentService.createTextOutput(JSON.stringify({ok:true}))
-            .setMimeType(ContentService.MimeType.JSON);
-        }
-      }
-    }
-    
-    // Nuevo registro
-    sheet.appendRow([
-      data.id, fecha, hora, data.partida, data.producto||'',
-      data.ingresa, data.recibe,
-      data.cuerosA||0, data.cuerosB||0, data.cuerosC||0,
-      total, destino, 'NO', ''
-    ]);
-    
-    return ContentService.createTextOutput(JSON.stringify({ok:true}))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({ok:false,error:err.message}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({ok:true,msg:'Control de Ingreso API activa'}))
-    .setMimeType(ContentService.MimeType.JSON);
-}`;
-
-document.getElementById('apps-script-code').value = APPS_SCRIPT_CODE;
-if (webhookUrl) document.getElementById('webhook-url').value = webhookUrl;
-
-function showPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  if(btn) btn.classList.add('active');
-  if(id==='registros') renderRecords('todos');
-  if(id==='stats') renderStats();
-  if(id==='config') renderConfig();
-}
-
-function selectDestino(dest) {
-  destinoSelected = dest;
-  document.getElementById('btn-salon').className = 'destino-btn'+(dest==='salon'?' selected-salon':'');
-  document.getElementById('btn-deposito').className = 'destino-btn'+(dest==='deposito'?' selected-deposito':'');
-}
-
-function showToast(msg, type='ok') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show'+(type==='error'?' error':type==='warn'?' warn':'');
-  setTimeout(()=>t.className='', 2800);
-}
-
-function updateSyncStatus(state) {
-  const dot = document.getElementById('sync-dot');
-  const lbl = document.getElementById('sync-label');
-  if(state==='ok'){dot.className='sync-dot ok';lbl.textContent='Sincronizado'}
-  if(state==='error'){dot.className='sync-dot error';lbl.textContent='Sin conexión'}
-  if(state==='syncing'){dot.className='sync-dot syncing';lbl.textContent='Sincronizando...'}
-  if(state==='none'){dot.className='sync-dot';lbl.textContent='Sin config'}
-}
-
-function updatePendingBanner() {
-  const banner = document.getElementById('pending-banner');
-  const txt = document.getElementById('pending-text');
-  if(pendingQueue.length>0){
-    banner.style.display='flex';
-    txt.textContent=`⚠️ ${pendingQueue.length} registro${pendingQueue.length>1?'s':''} pendiente${pendingQueue.length>1?'s':''} de sincronizar`;
-  } else { banner.style.display='none'; }
-}
-
-async function submitForm() {
-  const partida = document.getElementById('partida').value.trim();
-  const producto = document.getElementById('producto').value.trim();
-  const ingresa = document.getElementById('persona-ingresa').value.trim();
-  const recibe = document.getElementById('persona-recibe').value.trim();
-  const cuerosA = parseInt(document.getElementById('cueros-a').value)||0;
-  const cuerosB = parseInt(document.getElementById('cueros-b').value)||0;
-  const cuerosC = parseInt(document.getElementById('cueros-c').value)||0;
-
-  if(!partida) return showToast('⚠️ Ingresá el N° de Partida','error');
-  if(!ingresa) return showToast('⚠️ Falta la persona que ingresa','error');
-  if(!recibe) return showToast('⚠️ Falta la persona que recibe','error');
-  if(!destinoSelected) return showToast('⚠️ Seleccioná el destino','error');
-  if(cuerosA+cuerosB+cuerosC===0) return showToast('⚠️ Ingresá al menos 1 cuero','error');
-
-  const record = {
-    id: Date.now(), partida, producto, ingresa, recibe,
-    cuerosA, cuerosB, cuerosC,
-    destino: destinoSelected,
-    fecha: new Date().toISOString(),
-    synced: false, modificado: false
-  };
-
-  records.unshift(record);
-  saveLocal();
-
-  document.getElementById('partida').value='';
-  document.getElementById('producto').value='';
-  document.getElementById('persona-ingresa').value='';
-  document.getElementById('persona-recibe').value='';
-  document.getElementById('cueros-a').value='0';
-  document.getElementById('cueros-b').value='0';
-  document.getElementById('cueros-c').value='0';
-  destinoSelected=null;
-  document.getElementById('btn-salon').className='destino-btn';
-  document.getElementById('btn-deposito').className='destino-btn';
-
-  const sent = await sendToSheets(record);
-  if(sent){
-    showToast('✅ Registrado y sincronizado con Sheets');
-    updateSyncStatus('ok');
-  } else {
-    pendingQueue.push(record);
-    savePending();
-    updatePendingBanner();
-    if(!webhookUrl) showToast('✅ Guardado localmente (configurá Sheets en ⚙️)');
-    else { showToast('✅ Guardado. Se sincronizará cuando haya conexión','warn'); updateSyncStatus('error'); }
-  }
-}
-
-async function sendToSheets(record) {
-  if(!webhookUrl) return false;
-  try {
-    updateSyncStatus('syncing');
-    const res = await fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(record)});
-    const data = await res.json();
-    if(data.ok){
-      const idx = records.findIndex(r=>r.id===record.id);
-      if(idx!==-1){records[idx].synced=true;saveLocal();}
-      return true;
-    }
-    return false;
-  } catch(e){ return false; }
-}
-
-async function retryPending() {
-  if(!webhookUrl){showToast('⚠️ Configurá el webhook primero','error');return;}
-  if(pendingQueue.length===0) return;
-  showToast('↻ Reintentando...');
-  updateSyncStatus('syncing');
-  const stillPending=[];
-  for(const r of pendingQueue){
-    const sent=await sendToSheets(r);
-    if(!sent) stillPending.push(r);
-  }
-  pendingQueue=stillPending;
-  savePending();
-  updatePendingBanner();
-  if(stillPending.length===0){showToast('✅ Todos los registros sincronizados');updateSyncStatus('ok');}
-  else{showToast(`⚠️ ${stillPending.length} registro(s) aún pendientes`,'warn');updateSyncStatus('error');}
-}
-
-function saveWebhook() {
-  const url=document.getElementById('webhook-url').value.trim();
-  if(!url) return showToast('⚠️ Ingresá la URL','error');
-  webhookUrl=url;
-  localStorage.setItem('webhook_url',url);
-  showToast('✅ URL guardada');
-  renderConfig();
-  if(pendingQueue.length>0) retryPending();
-}
-
-async function testWebhook() {
-  const url=document.getElementById('webhook-url').value.trim();
-  if(!url) return showToast('⚠️ Ingresá la URL primero','error');
-  showToast('🧪 Probando...');
-  updateSyncStatus('syncing');
-  try {
-    const res=await fetch(url);
-    const data=await res.json();
-    const el=document.getElementById('webhook-test-result');
-    el.style.display='block';
-    if(data.ok){el.style.color='var(--green)';el.textContent='✅ Conexión exitosa';updateSyncStatus('ok');showToast('✅ Conexión exitosa');}
-    else throw new Error();
-  } catch(e){
-    const el=document.getElementById('webhook-test-result');
-    el.style.display='block';el.style.color='var(--red)';
-    el.textContent='❌ No se pudo conectar';updateSyncStatus('error');showToast('❌ Error de conexión','error');
-  }
-}
-
-function copyScript(){
-  navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>showToast('📋 Código copiado')).catch(()=>{
-    document.getElementById('apps-script-code').select();document.execCommand('copy');showToast('📋 Código copiado');
-  });
-}
-
-function renderConfig(){
-  document.getElementById('cfg-local-count').textContent=records.length;
-  document.getElementById('cfg-pending-count').textContent=pendingQueue.length;
-  const ws=document.getElementById('cfg-webhook-status');
-  if(webhookUrl){ws.textContent='✅ Sí';ws.style.color='var(--green)';}
-  else{ws.textContent='❌ No configurado';ws.style.color='var(--red)';}
-  updateSyncStatus(webhookUrl?(pendingQueue.length>0?'error':'ok'):'none');
-}
-
-function saveLocal(){localStorage.setItem('ingresos_v3',JSON.stringify(records));}
-function savePending(){localStorage.setItem('ingresos_pending',JSON.stringify(pendingQueue));}
-
-function renderRecords(filter){
-  const list=document.getElementById('records-list');
-  let data=records;
-  if(filter==='salon') data=records.filter(r=>r.destino==='salon');
-  if(filter==='deposito') data=records.filter(r=>r.destino==='deposito');
-  if(filter==='pending') data=records.filter(r=>!r.synced);
-
-  if(data.length===0){
-    list.innerHTML=`<div class="empty-state"><div class="icon">📭</div><p>No hay registros${filter!=='todos'?' en esta categoría':' aún'}</p></div>`;
-    return;
-  }
-
-  list.innerHTML=data.map(r=>{
-    const d=new Date(r.fecha);
-    const fecha=d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const hora=d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-    const badge=r.destino==='salon'?'Salón Ventas':'Depósito';
-    let cardClass=r.destino;
-    if(r.modificado) cardClass+=' modified';
-    else if(!r.synced) cardClass+=' pending';
-    return `
-      <div class="record-card ${cardClass}">
-        <div class="record-top">
-          <div class="record-partida">PARTIDA #${r.partida}</div>
-          <div class="record-badge ${r.destino}">${badge}</div>
-        </div>
-        ${r.producto?`<div class="record-producto"><span>Producto:</span> ${r.producto}</div>`:''}
-        <div class="record-names"><span>Ingresa:</span> ${r.ingresa} &nbsp;→&nbsp; <span>Recibe:</span> ${r.recibe}</div>
-        <div class="record-cueros">
-          <div class="cuero-chip a">A: ${r.cuerosA||0}</div>
-          <div class="cuero-chip b">B: ${r.cuerosB||0}</div>
-          <div class="cuero-chip c">C: ${r.cuerosC||0}</div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div class="record-time">📅 ${fecha} 🕐 ${hora} ${r.synced?'☁️':'⏳'}</div>
-          <button class="btn-edit" onclick="openEdit(${r.id})">✏️ Editar</button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function filterRecords(type,btn){
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderRecords(type);
-}
-
-function renderStats(){
-  const totalA=records.reduce((s,r)=>s+(r.cuerosA||0),0);
-  const totalB=records.reduce((s,r)=>s+(r.cuerosB||0),0);
-  const totalC=records.reduce((s,r)=>s+(r.cuerosC||0),0);
-  const salon=records.filter(r=>r.destino==='salon').length;
-  const deposito=records.filter(r=>r.destino==='deposito').length;
-
-  document.getElementById('stats-grid').innerHTML=`
-    <div class="stat-card"><div class="stat-num accent">${records.length}</div><div class="stat-label">Total Ingresos</div></div>
-    <div class="stat-card"><div class="stat-num accent">${totalA+totalB+totalC}</div><div class="stat-label">Total Cueros</div></div>
-    <div class="stat-card"><div class="stat-num blue">${salon}</div><div class="stat-label">→ Salón</div></div>
-    <div class="stat-card"><div class="stat-num green">${deposito}</div><div class="stat-label">→ Depósito</div></div>
-    <div class="stat-card"><div class="stat-num accent">${totalA}</div><div class="stat-label">Clase A</div></div>
-    <div class="stat-card"><div class="stat-num blue">${totalB}</div><div class="stat-label">Clase B</div></div>
-    <div class="stat-card"><div class="stat-num purple">${totalC}</div><div class="stat-label">Clase C</div></div>
-    <div class="stat-card"><div class="stat-num accent">${records.filter(r=>r.modificado).length}</div><div class="stat-label">Modificados</div></div>
-  `;
-
-  const partidas=document.getElementById('stats-partidas');
-  if(!records.length){partidas.innerHTML='<div class="empty-state"><div class="icon">📊</div><p>Sin datos aún</p></div>';return;}
-  partidas.innerHTML=records.slice(0,5).map(r=>{
-    const d=new Date(r.fecha);
-    const fecha=d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'});
-    return `<div class="record-card ${r.destino}" style="padding:12px 16px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div class="record-partida" style="font-size:1.1rem">Partida #${r.partida}</div>
-          <div style="font-size:.8rem;color:var(--muted);margin-top:2px">${r.producto||r.ingresa}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:.85rem;color:var(--text)">A:${r.cuerosA||0} B:${r.cuerosB||0} C:${r.cuerosC||0}</div>
-          <div style="font-size:.72rem;color:var(--muted)">${fecha} ${r.synced?'☁️':''}${r.modificado?'✏️':''}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openEdit(id){
-  const r=records.find(x=>x.id===id);
-  if(!r) return;
-  document.getElementById('edit-id').value=id;
-  document.getElementById('edit-partida').value=r.partida;
-  document.getElementById('edit-producto').value=r.producto||'';
-  document.getElementById('edit-ingresa').value=r.ingresa;
-  document.getElementById('edit-recibe').value=r.recibe;
-  document.getElementById('edit-cueros-a').value=r.cuerosA||0;
-  document.getElementById('edit-cueros-b').value=r.cuerosB||0;
-  document.getElementById('edit-cueros-c').value=r.cuerosC||0;
-  document.getElementById('edit-destino').value=r.destino;
-  document.getElementById('edit-modal').classList.add('open');
-}
-
-function closeEdit(){document.getElementById('edit-modal').classList.remove('open');}
-
-async function saveEdit(){
-  const id=parseInt(document.getElementById('edit-id').value);
-  const idx=records.findIndex(r=>r.id===id);
-  if(idx===-1) return;
-  const cuerosA=parseInt(document.getElementById('edit-cueros-a').value)||0;
-  const cuerosB=parseInt(document.getElementById('edit-cueros-b').value)||0;
-  const cuerosC=parseInt(document.getElementById('edit-cueros-c').value)||0;
-  if(cuerosA+cuerosB+cuerosC===0) return showToast('⚠️ Ingresá al menos 1 cuero','error');
-
-  records[idx]={
-    ...records[idx],
-    partida: document.getElementById('edit-partida').value.trim(),
-    producto: document.getElementById('edit-producto').value.trim(),
-    ingresa: document.getElementById('edit-ingresa').value.trim(),
-    recibe: document.getElementById('edit-recibe').value.trim(),
-    cuerosA, cuerosB, cuerosC,
-    destino: document.getElementById('edit-destino').value,
-    synced: false, modificado: true,
-    fechaModificacion: new Date().toISOString()
-  };
-
-  saveLocal();
-  closeEdit();
-  renderRecords('todos');
-  document.querySelectorAll('.filter-btn').forEach((b,i)=>i===0?b.classList.add('active'):b.classList.remove('active'));
-
-  const sent=await sendToSheets(records[idx]);
-  if(sent){showToast('✅ Cambios guardados y actualizados en Sheets');updateSyncStatus('ok');}
-  else{
-    pendingQueue=pendingQueue.filter(p=>p.id!==id);
-    pendingQueue.push(records[idx]);
-    savePending();
-    updatePendingBanner();
-    showToast('✅ Cambios guardados. Se sincronizará luego','warn');
-  }
-}
-
-function openScanner(){
-  document.getElementById('scanner-modal').classList.add('open');
-  scannerActive=true;
-  Quagga.init({
-    inputStream:{name:"Live",type:"LiveStream",target:document.getElementById('scanner-viewport'),
-      constraints:{facingMode:"environment",width:{ideal:1280},height:{ideal:720}}},
-    locator:{patchSize:"medium",halfSample:true},numOfWorkers:2,frequency:10,
-    decoder:{readers:["code_128_reader","ean_reader","ean_8_reader","code_39_reader","codabar_reader","upc_reader","upc_e_reader","i2of5_reader"]},
-    locate:true
-  },function(err){
-    if(err){closeScanner();showToast('⚠️ No se pudo acceder a la cámara','error');return;}
-    Quagga.start();
-  });
-  let lastCode=null,lastTime=0;
-  Quagga.onDetected(function(result){
-    const code=result.codeResult.code;
-    const now=Date.now();
-    if(code===lastCode&&now-lastTime<2000) return;
-    lastCode=code;lastTime=now;
-    const flash=document.getElementById('scan-flash');
-    flash.style.display='block';setTimeout(()=>flash.style.display='none',400);
-    document.getElementById('partida').value=code;
-    closeScanner();showToast(`✅ Código leído: ${code}`);
-  });
-}
-
-function closeScanner(){
-  if(!scannerActive) return;
-  scannerActive=false;
-  try{Quagga.stop();}catch(e){}
-  document.getElementById('scanner-modal').classList.remove('open');
-}
+let autoRefreshInterval = null;
 
 // =====================
-// PRODUCTOS AUTOCOMPLETE
+// PRODUCTOS
 // =====================
 const PRODUCTOS = [
   {cod:'1246',desc:'ABATANADO'},{cod:'36',desc:'Alfombra A'},{cod:'35',desc:'Alfombra B'},
@@ -785,17 +351,10 @@ const PRODUCTOS = [
   {cod:'1234',desc:'Descarne Liso Negro Clase B'},{cod:'1227',desc:'Descarne Oferta'},
   {cod:'132',desc:'Faldas'},{cod:'133',desc:'Faldas Finas'},{cod:'1091',desc:'Grabados'},
   {cod:'1036',desc:'Grupon Doble Blanco Clase B 3mm a 5mm'},
-  {cod:'2023',desc:'Grupon Doble Color Azul Clase A 3mm a 5mm'},
-  {cod:'1229',desc:'Grupon Doble Color Blando Clase A 3mm a 5mm'},
-  {cod:'07',desc:'Grupon Doble Color DS Clase A 3mm a 5mm'},
-  {cod:'09',desc:'Grupon Doble Color HB Clase A 3mm a 5mm'},
-  {cod:'08',desc:'Grupon Doble Color HBR Clase A 3mm a 5mm'},
   {cod:'05',desc:'Grupon Doble Color Negro Clase A 3mm a 5mm'},
   {cod:'06',desc:'Grupon Doble Color Suela Clase A 3mm a 5mm'},
-  {cod:'010',desc:'Grupon Doble Color Verde Clase A 3mm a 5mm'},
   {cod:'1038',desc:'Grupon Doble Marrón Ambar Clase B 3mm a 5mm'},
   {cod:'1083',desc:'Grupon Doble Marrón Chocolate Clase B 3mm a 5mm'},
-  {cod:'1096',desc:'Grupon Doble Marrón Chocolate Engrasado Clase B 3mm a 5mm'},
   {cod:'1098',desc:'Grupon Doble Marrón Tabaco Clase A 3mm a 5mm'},
   {cod:'1143',desc:'Grupon Doble Marrón Tabaco Clase B 3mm a 5mm'},
   {cod:'1035',desc:'Grupon Doble Marrón Vino Clase B 3mm a 5mm'},
@@ -804,204 +363,406 @@ const PRODUCTOS = [
   {cod:'120',desc:'Grupon Doble Natural Engrasado Clase A 3mm a 5mm'},
   {cod:'121',desc:'Grupon Doble Natural Engrasado Clase B 3mm a 5mm'},
   {cod:'1039',desc:'Grupon Doble Negro Clase B 3mm a 5mm'},
-  {cod:'1069',desc:'Grupon Doble Negro Engrasado Clase A 3mm a 5mm'},
-  {cod:'1070',desc:'Grupon Doble Negro Engrasado Clase B 3mm a 5mm'},
   {cod:'1237',desc:'Grupon Doble Oferta'},{cod:'1037',desc:'Grupon Doble Rojo Clase B 3mm a 5mm'},
   {cod:'1034',desc:'Grupon Doble Suela Clase B 3mm a 5mm'},
   {cod:'58',desc:'Grupon Zapatero Clase A'},{cod:'100',desc:'Grupon Zapatero Clase B'},
   {cod:'1225',desc:'Lado Rechazo'},
-  {cod:'1067',desc:'Lados Bridge Color Azul 1mm a 2mm'},{cod:'1027',desc:'Lados Bridge Marrón Ambar 1mm a 2mm'},
-  {cod:'1068',desc:'Lados Bridge Marrón Chocolate 1mm a 2mm'},{cod:'1023',desc:'Lados Bridge Marrón Tabaco 1mm a 2mm'},
-  {cod:'1028',desc:'Lados Bridge Marrón Vino 1mm a 2mm'},{cod:'1022',desc:'Lados Bridge Negro 1mm a 2mm'},
-  {cod:'1026',desc:'Lados Bridge Rojo 1mm a 2mm'},{cod:'2001',desc:'Lados Bridge Suela 1mm a 2mm'},
-  {cod:'1223',desc:'Lados Vaqueta Blanco Clase B 1mm a 2.4mm'},
-  {cod:'1109',desc:'Lados Vaqueta Color Azul Clase A 2.5mm a 3mm'},
-  {cod:'1110',desc:'Lados Vaqueta Color Azul Clase B 2.5mm a 3mm'},
-  {cod:'1019',desc:'Lados Vaqueta Color Azul Clase B 1mm a 2.4mm'},
-  {cod:'03',desc:'Lados Vaqueta Color DS Grueso Clase A 3mm a 5mm'},
-  {cod:'02',desc:'Lados Vaqueta Color HB Grueso Clase A 3mm a 5mm'},
-  {cod:'01',desc:'Lados Vaqueta Color Negro Grueso Clase A 3mm a 5mm'},
-  {cod:'04',desc:'Lados Vaqueta Color Suela Grueso Clase A 3mm a 5mm'},
-  {cod:'13',desc:'Lados Vaqueta Economico'},{cod:'1243',desc:'Lados Vaqueta Economico Color HB'},
-  {cod:'14',desc:'Lados Vaqueta Economico Engrasado'},
-  {cod:'1097',desc:'Lados Vaqueta Engrasado Negro Clase B 1mm a 2.4mm'},
-  {cod:'1228',desc:'Lados Vaqueta Engrasado Rojo Clase B 1mm a 2.4mm'},
-  {cod:'1062',desc:'Lados Vaqueta Marrón Ambar Clase A 1mm a 2.4mm'},
-  {cod:'1106',desc:'Lados Vaqueta Marrón Ambar Clase A 2.5mm a 3mm'},
-  {cod:'1063',desc:'Lados Vaqueta Marrón Ambar Clase B 1mm a 2.4mm'},
-  {cod:'1107',desc:'Lados Vaqueta Marrón Ambar Clase B 2.5mm a 3mm'},
-  {cod:'1013',desc:'Lados Vaqueta Marrón Ambar Grueso Clase B 3mm a 5mm'},
-  {cod:'1033',desc:'Lados Vaqueta Marrón Chocolate Clase A 1mm a 2.4mm'},
-  {cod:'1112',desc:'Lados Vaqueta Marrón Chocolate Clase A 2.5mm a 3mm'},
-  {cod:'1066',desc:'Lados Vaqueta Marrón Chocolate Clase B 1mm a 2.4mm'},
-  {cod:'1113',desc:'Lados Vaqueta Marrón Chocolate Clase B 2.5mm a 3mm'},
-  {cod:'10101',desc:'Lados Vaqueta Marrón Chocolate Engrasado Clase B 1mm a 2.4mm'},
-  {cod:'1065',desc:'Lados Vaqueta Marrón Chocolate Grueso Clase B 3mm a 5mm'},
-  {cod:'19',desc:'Lados Vaqueta Marrón Tabaco Clase A 1mm a 2.4mm'},
-  {cod:'1121',desc:'Lados Vaqueta Marrón Tabaco Clase A 2.5mm a 3mm'},
-  {cod:'1122',desc:'Lados Vaqueta Marrón Tabaco Clase B 2.5mm a 3mm'},
-  {cod:'1030',desc:'Lados Vaqueta Marrón Tabaco Grueso Clase A 3mm a 5mm'},
-  {cod:'1012',desc:'Lados Vaqueta Marrón Tabaco Grueso Clase B 3mm a 5mm'},
-  {cod:'1061',desc:'Lados Vaqueta Marrón Vino Clase A 1mm a 2.4mm'},
-  {cod:'1115',desc:'Lados Vaqueta Marrón Vino Clase A 2.5mm a 3mm'},
-  {cod:'1016',desc:'Lados Vaqueta Marrón Vino Clase B 1mm a 2.4mm'},
-  {cod:'1116',desc:'Lados Vaqueta Marrón Vino Clase B 2.5mm a 3mm'},
-  {cod:'1029',desc:'Lados Vaqueta Marrón Vino Grueso Clase A 3mm a 5mm'},
-  {cod:'1009',desc:'Lados Vaqueta Marrón Vino Grueso Clase B 3mm a 5mm'},
   {cod:'69',desc:'Lados Vaqueta Natural Clase A 1mm a 2.4mm'},
-  {cod:'1133',desc:'Lados Vaqueta Natural Clase A 2.5mm a 3mm'},
-  {cod:'1242',desc:'Lados Vaqueta Natural Clase B 1mm a 2.4mm'},
   {cod:'47',desc:'Lados Vaqueta Natural Clase B 2.5mm a 3mm'},
-  {cod:'68',desc:'Lados Vaqueta Natural Engrasada Clase A 1mm a 2.4mm'},
-  {cod:'1134',desc:'Lados Vaqueta Natural Engrasada Clase A 2.5mm a 3mm'},
-  {cod:'29',desc:'Lados Vaqueta Natural Engrasada Clase B 1mm a 2.4mm'},
-  {cod:'1135',desc:'Lados Vaqueta Natural Engrasada Clase B 2.5mm a 3mm'},
-  {cod:'91',desc:'Lados Vaqueta Natural Engrasada Grueso Clase A 3mm a 5mm'},
-  {cod:'92',desc:'Lados Vaqueta Natural Engrasada Grueso Clase B 3mm a 5mm'},
-  {cod:'71',desc:'Lados Vaqueta Natural Grueso Clase A 3mm a 5mm'},
-  {cod:'109',desc:'Lados Vaqueta Natural Grueso Clase B 3mm a 5mm'},
-  {cod:'1222',desc:'Lados Vaqueta Natural Economico 2.5mm a 3mm'},
-  {cod:'1031',desc:'Lados Vaqueta Negro Clase A 1mm a 2.4mm'},
-  {cod:'1118',desc:'Lados Vaqueta Negro Clase A 2.5mm a 3mm'},
-  {cod:'1018',desc:'Lados Vaqueta Negro Clase B 1mm a 2.4mm'},
-  {cod:'1119',desc:'Lados Vaqueta Negro Clase B 2.5mm a 3mm'},
-  {cod:'1235',desc:'Lados Vaqueta Negro Engrasado Clase A 1mm a 2.4mm'},
-  {cod:'1136',desc:'Lados Vaqueta Negro Engrasado Clase A 2.5mm a 3mm'},
-  {cod:'1236',desc:'Lados Vaqueta Negro Engrasado Clase B 1mm a 2.4mm'},
-  {cod:'1137',desc:'Lados Vaqueta Negro Engrasado Clase B 2.5mm a 3mm'},
-  {cod:'1011',desc:'Lados Vaqueta Negro Grueso Clase B 3mm a 5mm'},
   {cod:'1092',desc:'Lados Vaqueta Oferta'},
-  {cod:'4444',desc:'Lados Vaqueta Rojo Clase A 1mm a 2.4mm'},
-  {cod:'1124',desc:'Lados Vaqueta Rojo Clase A 2.5mm a 3mm'},
-  {cod:'3333',desc:'Lados Vaqueta Rojo Clase B 1mm a 2.4mm'},
-  {cod:'1125',desc:'Lados Vaqueta Rojo Clase B 2.5mm a 3mm'},
-  {cod:'1021',desc:'Lados Vaqueta Rosa Clase B 1mm a 2.4mm'},
-  {cod:'1064',desc:'Lados Vaqueta Suela Clase A 1mm a 2.4mm'},
-  {cod:'1127',desc:'Lados Vaqueta Suela Clase A 2.5mm a 3mm'},
-  {cod:'1015',desc:'Lados Vaqueta Suela Clase B 1mm a 2.4mm'},
-  {cod:'1128',desc:'Lados Vaqueta Suela Clase B 2.5mm a 3mm'},
-  {cod:'1010',desc:'Lados Vaqueta Suela Grueso Clase B 3mm a 5mm'},
-  {cod:'1130',desc:'Lados Vaqueta Verde Clase A 2.5mm a 3mm'},
-  {cod:'1020',desc:'Lados Vaqueta Verde Clase B 1mm a 2.4mm'},
-  {cod:'1131',desc:'Lados Vaqueta Verde Clase B 2.5mm a 3mm'},
   {cod:'30',desc:'Lomillo de Suela 55cm'},{cod:'1052',desc:'Lomillo de Suela 60cm'},
-  {cod:'1053',desc:'Lomillo de Suela 65cm'},{cod:'4310218',desc:'Mercado Libre'},
-  {cod:'1414',desc:'Suela Engrasada Color Azul Clase B 4mm a 6mm'},
-  {cod:'11',desc:'Suela Engrasada Color Negro Clase A 4mm a 6mm'},
-  {cod:'1072',desc:'Suela Engrasada Marrón Chocolate Clase A 3mm a 4mm'},
-  {cod:'1079',desc:'Suela Engrasada Marrón Chocolate Clase A 4mm a 6mm'},
-  {cod:'1075',desc:'Suela Engrasada Marrón Chocolate Clase B 3mm a 4mm'},
-  {cod:'1000',desc:'Suela Engrasada Marrón Chocolate Clase B 4mm a 6mm'},
-  {cod:'1073',desc:'Suela Engrasada Marrón Vino Clase A 3mm a 4mm'},
-  {cod:'1080',desc:'Suela Engrasada Marrón Vino Clase A 4mm a 6mm'},
-  {cod:'1076',desc:'Suela Engrasada Marrón Vino Clase B 3mm a 4mm'},
-  {cod:'1003',desc:'Suela Engrasada Marrón Vino Clase B 4mm a 6mm'},
-  {cod:'102',desc:'Suela Engrasada Natural Clase A 3mm a 4mm'},
+  {cod:'1053',desc:'Lomillo de Suela 65cm'},
   {cod:'61',desc:'Suela Engrasada Natural Clase A 4mm a 6mm'},
-  {cod:'1093',desc:'Suela Engrasada Natural Clase B 3mm a 4mm'},
   {cod:'111',desc:'Suela Engrasada Natural Clase B 4mm a 6mm'},
-  {cod:'1074',desc:'Suela Engrasada Negro Clase A 3mm a 4mm'},
-  {cod:'1077',desc:'Suela Engrasada Negro Clase B 3mm a 4mm'},
-  {cod:'1081',desc:'Suela Engrasada Negro Clase B 4mm a 6mm'},
   {cod:'1239',desc:'Suela Engrasada Oferta'},
-  {cod:'1071',desc:'Suela Engrasada Rojo Clase A 3mm a 4mm'},
-  {cod:'1082',desc:'Suela Engrasada Rojo Clase A 4mm a 6mm'},
-  {cod:'1078',desc:'Suela Engrasada Rojo Clase B 3mm a 4mm'},
   {cod:'15',desc:'Suela Engrasada Rojo Clase B 4mm a 6mm'}
 ];
 
 function filterProductos(query) {
   const list = document.getElementById('producto-list');
   const input = document.getElementById('producto');
-  if (!query || query.length < 1) { list.classList.remove('open'); return; }
+  if (!query||query.length<1){list.classList.remove('open');return;}
   const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  const matches = PRODUCTOS.filter(p => {
-    const d = p.desc.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    const c = p.cod.toLowerCase();
-    return d.includes(q) || c.includes(q);
-  }).slice(0, 12);
-  if (matches.length === 0) { list.classList.remove('open'); return; }
-  // Position the list below the input
+  const matches = PRODUCTOS.filter(p=>{
+    const d=p.desc.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    return d.includes(q)||p.cod.toLowerCase().includes(q);
+  }).slice(0,12);
+  if(!matches.length){list.classList.remove('open');return;}
   const rect = input.getBoundingClientRect();
-  list.style.top = (rect.bottom + window.scrollY + 4) + 'px';
-  list.style.left = '20px';
-  list.innerHTML = matches.map(p =>
-    `<div class="autocomplete-item" ontouchend="selectProducto('${p.cod}','${p.desc.replace(/'/g,"\\'")}');" onclick="selectProducto('${p.cod}','${p.desc.replace(/'/g,"\\'")}')">
-      ${p.desc}<small>Cód: ${p.cod}</small>
-    </div>`
-  ).join('');
+  list.style.top=(rect.bottom+window.scrollY+4)+'px';
+  list.style.left='20px';
+  list.innerHTML=matches.map(p=>`<div class="autocomplete-item" ontouchend="selectProducto('${p.cod}','${p.desc.replace(/'/g,"\\'")}');" onclick="selectProducto('${p.cod}','${p.desc.replace(/'/g,"\\'")}')">
+    ${p.desc}<small>Cód: ${p.cod}</small></div>`).join('');
   list.classList.add('open');
 }
 
-function selectProducto(cod, desc) {
-  document.getElementById('producto').value = `[${cod}] ${desc}`;
+function selectProducto(cod,desc){
+  document.getElementById('producto').value=`[${cod}] ${desc}`;
   document.getElementById('producto-list').classList.remove('open');
 }
 
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.autocomplete-wrap')) {
-    document.getElementById('producto-list').classList.remove('open');
-  }
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.autocomplete-wrap')) document.getElementById('producto-list').classList.remove('open');
 });
 
-// También cuando se dicta el producto, buscar automáticamente
-const origStopVoice = stopVoice;
+// =====================
+// UI
+// =====================
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='registros') loadRecords();
+  if(id==='stats') loadStats();
+}
+
+function selectDestino(dest){
+  destinoSelected=dest;
+  document.getElementById('btn-salon').className='destino-btn'+(dest==='salon'?' sel-salon':'');
+  document.getElementById('btn-deposito').className='destino-btn'+(dest==='deposito'?' sel-deposito':'');
+  document.getElementById('btn-dep-salon').className='destino-btn'+(dest==='dep-salon'?' sel-dep-salon':'');
+  if(dest==='dep-salon') document.getElementById('btn-dep-salon').style.gridColumn='span 2';
+  else document.getElementById('btn-dep-salon').style.gridColumn='span 2';
+}
+
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='show'+(type==='error'?' error':type==='warn'?' warn':'');
+  setTimeout(()=>t.className='',2800);
+}
+
+function updateSyncStatus(state){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-label');
+  if(state==='ok'){dot.className='sync-dot ok';lbl.textContent='Sincronizado'}
+  if(state==='error'){dot.className='sync-dot error';lbl.textContent='Sin conexión'}
+  if(state==='syncing'){dot.className='sync-dot syncing';lbl.textContent='Sincronizando...'}
+}
 
 // =====================
-// INIT
+// SUBMIT
 // =====================
-let recognition = null;
-let voiceTargetId = null;
-let voiceActive = false;
+async function submitForm(){
+  const partida=document.getElementById('partida').value.trim();
+  const producto=document.getElementById('producto').value.trim();
+  const ingresa=document.getElementById('persona-ingresa').value.trim();
+  const recibe=document.getElementById('persona-recibe').value.trim();
+  const cuerosA=parseInt(document.getElementById('cueros-a').value)||0;
+  const cuerosB=parseInt(document.getElementById('cueros-b').value)||0;
+  const cuerosC=parseInt(document.getElementById('cueros-c').value)||0;
+  if(!partida) return showToast('⚠️ Ingresá el N° de Partida','error');
+  if(!ingresa) return showToast('⚠️ Falta la persona que ingresa','error');
+  if(!recibe) return showToast('⚠️ Falta la persona que recibe','error');
+  if(!destinoSelected) return showToast('⚠️ Seleccioná el destino','error');
+  if(cuerosA+cuerosB+cuerosC===0) return showToast('⚠️ Ingresá al menos 1 cuero','error');
 
-function startVoice(fieldId, fieldLabel) {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    showToast('⚠️ Tu navegador no soporta reconocimiento de voz', 'error');
+  const btn=document.getElementById('btn-submit');
+  btn.disabled=true;btn.textContent='Enviando...';
+  updateSyncStatus('syncing');
+
+  const record={id:Date.now(),partida,producto,ingresa,recibe,cuerosA,cuerosB,cuerosC,destino:destinoSelected,fecha:new Date().toISOString(),modificado:false};
+
+  try{
+    const res=await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(record)});
+    const data=await res.json();
+    if(data.ok){
+      showToast('✅ Registrado y guardado en Sheets');
+      updateSyncStatus('ok');
+      resetForm();
+      // Reload registros if on that tab
+      if(document.getElementById('page-registros').classList.contains('active')) loadRecords();
+    } else { throw new Error('Error en Sheets'); }
+  } catch(e){
+    showToast('❌ Error al guardar. Verificá la conexión','error');
+    updateSyncStatus('error');
+  }
+  btn.disabled=false;btn.textContent='✅ Registrar Ingreso';
+}
+
+function resetForm(){
+  document.getElementById('partida').value='';
+  document.getElementById('producto').value='';
+  document.getElementById('persona-ingresa').value='';
+  document.getElementById('persona-recibe').value='';
+  document.getElementById('cueros-a').value='0';
+  document.getElementById('cueros-b').value='0';
+  document.getElementById('cueros-c').value='0';
+  destinoSelected=null;
+  document.getElementById('btn-salon').className='destino-btn';
+  document.getElementById('btn-deposito').className='destino-btn';
+  document.getElementById('btn-dep-salon').className='destino-btn';
+}
+
+// =====================
+// CARGAR REGISTROS DESDE SHEETS
+// =====================
+async function loadRecords(){
+  const btn=document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  updateSyncStatus('syncing');
+  try{
+    const res=await fetch(WEBHOOK+'?action=getAll&t='+Date.now());
+    const data=await res.json();
+    if(data.ok&&data.records){
+      allRecords=data.records.reverse();
+      renderRecords(currentFilter);
+      updateSyncStatus('ok');
+    } else { throw new Error(); }
+  } catch(e){
+    updateSyncStatus('error');
+    if(allRecords.length===0) document.getElementById('records-list').innerHTML='<div class="empty-state"><div class="icon">📡</div><p>No se pudo conectar con Sheets.<br>Verificá tu conexión.</p></div>';
+  }
+  btn.classList.remove('spinning');
+}
+
+async function loadStats(){
+  if(allRecords.length===0) await loadRecords();
+  renderStats();
+}
+
+// =====================
+// RENDER RECORDS
+// =====================
+function renderRecords(filter){
+  currentFilter=filter;
+  const list=document.getElementById('records-list');
+  let data=allRecords;
+  if(filter==='salon') data=allRecords.filter(r=>r.destino==='salon');
+  if(filter==='deposito') data=allRecords.filter(r=>r.destino==='deposito');
+  if(filter==='dep-salon') data=allRecords.filter(r=>r.destino==='dep-salon');
+  if(!data.length){
+    list.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>No hay registros aún</p></div>';
     return;
   }
-  voiceTargetId = fieldId;
-  voiceActive = true;
-  recognition = new SpeechRecognition();
-  recognition.lang = 'es-AR';
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  document.getElementById('voice-field-label').textContent = `Dictando: ${fieldLabel}`;
-  document.getElementById('voice-transcript').textContent = 'Hablá ahora...';
+  const destinoLabel={salon:'Salón Ventas',deposito:'Depósito',  'dep-salon':'Dep→Salón'};
+  list.innerHTML=data.map(r=>{
+    const badge=destinoLabel[r.destino]||r.destino;
+    return `<div class="record-card ${r.destino}">
+      <div class="record-top">
+        <div class="record-partida">PARTIDA #${r.partida}</div>
+        <div class="record-badge ${r.destino}">${badge}</div>
+      </div>
+      ${r.producto?`<div class="record-producto"><span>Producto:</span> ${r.producto}</div>`:''}
+      <div class="record-names"><span>Ingresa:</span> ${r.ingresa} → <span>Recibe:</span> ${r.recibe}</div>
+      <div class="record-cueros">
+        <div class="cuero-chip a">A: ${r.cuerosA||0}</div>
+        <div class="cuero-chip b">B: ${r.cuerosB||0}</div>
+        <div class="cuero-chip c">C: ${r.cuerosC||0}</div>
+      </div>
+      <div class="record-footer">
+        <div class="record-time">📅 ${formatDate(r.fecha)} ${r.modificado?'✏️':''}</div>
+        <div class="record-actions">
+          <button class="btn-edit-rec" onclick="openEdit('${r.id}')">✏️ Editar</button>
+          <button class="btn-delete-rec" onclick="openDelete('${r.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterRecords(type,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRecords(type);
+}
+
+function formatDate(iso){
+  if(!iso) return '';
+  try{
+    const d=new Date(iso);
+    return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  } catch(e){ return iso; }
+}
+
+// =====================
+// STATS
+// =====================
+function renderStats(){
+  const totalA=allRecords.reduce((s,r)=>s+(parseInt(r.cuerosA)||0),0);
+  const totalB=allRecords.reduce((s,r)=>s+(parseInt(r.cuerosB)||0),0);
+  const totalC=allRecords.reduce((s,r)=>s+(parseInt(r.cuerosC)||0),0);
+  const salon=allRecords.filter(r=>r.destino==='salon').length;
+  const deposito=allRecords.filter(r=>r.destino==='deposito').length;
+  const depSalon=allRecords.filter(r=>r.destino==='dep-salon').length;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-num accent">${allRecords.length}</div><div class="stat-label">Total Ingresos</div></div>
+    <div class="stat-card"><div class="stat-num accent">${totalA+totalB+totalC}</div><div class="stat-label">Total Cueros</div></div>
+    <div class="stat-card"><div class="stat-num blue">${salon}</div><div class="stat-label">→ Salón</div></div>
+    <div class="stat-card"><div class="stat-num green">${deposito}</div><div class="stat-label">→ Depósito</div></div>
+    <div class="stat-card"><div class="stat-num purple">${depSalon}</div><div class="stat-label">Dep→Salón</div></div>
+    <div class="stat-card"><div class="stat-num accent">${totalA}</div><div class="stat-label">Clase A</div></div>
+    <div class="stat-card"><div class="stat-num blue">${totalB}</div><div class="stat-label">Clase B</div></div>
+    <div class="stat-card"><div class="stat-num purple">${totalC}</div><div class="stat-label">Clase C</div></div>`;
+  const partidas=document.getElementById('stats-partidas');
+  if(!allRecords.length){partidas.innerHTML='<div class="empty-state"><div class="icon">📊</div><p>Sin datos aún</p></div>';return;}
+  partidas.innerHTML=allRecords.slice(0,5).map(r=>`
+    <div class="record-card ${r.destino}" style="padding:11px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div class="record-partida" style="font-size:1rem">Partida #${r.partida}</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:2px">${r.producto||r.ingresa}</div></div>
+        <div style="text-align:right"><div style="font-size:.82rem;color:var(--text)">A:${r.cuerosA||0} B:${r.cuerosB||0} C:${r.cuerosC||0}</div>
+        <div style="font-size:.7rem;color:var(--muted)">${formatDate(r.fecha).split(' ')[0]}</div></div>
+      </div>
+    </div>`).join('');
+}
+
+// =====================
+// EDITAR
+// =====================
+function openEdit(id){
+  const r=allRecords.find(x=>String(x.id)===String(id));
+  if(!r) return;
+  document.getElementById('edit-id').value=id;
+  document.getElementById('edit-partida').value=r.partida||'';
+  document.getElementById('edit-producto').value=r.producto||'';
+  document.getElementById('edit-ingresa').value=r.ingresa||'';
+  document.getElementById('edit-recibe').value=r.recibe||'';
+  document.getElementById('edit-cueros-a').value=r.cuerosA||0;
+  document.getElementById('edit-cueros-b').value=r.cuerosB||0;
+  document.getElementById('edit-cueros-c').value=r.cuerosC||0;
+  document.getElementById('edit-destino').value=r.destino||'salon';
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEdit(){document.getElementById('edit-modal').classList.remove('open');}
+
+async function saveEdit(){
+  const id=document.getElementById('edit-id').value;
+  const cuerosA=parseInt(document.getElementById('edit-cueros-a').value)||0;
+  const cuerosB=parseInt(document.getElementById('edit-cueros-b').value)||0;
+  const cuerosC=parseInt(document.getElementById('edit-cueros-c').value)||0;
+  if(cuerosA+cuerosB+cuerosC===0) return showToast('⚠️ Ingresá al menos 1 cuero','error');
+  const updated={
+    id:parseInt(id),
+    partida:document.getElementById('edit-partida').value.trim(),
+    producto:document.getElementById('edit-producto').value.trim(),
+    ingresa:document.getElementById('edit-ingresa').value.trim(),
+    recibe:document.getElementById('edit-recibe').value.trim(),
+    cuerosA,cuerosB,cuerosC,
+    destino:document.getElementById('edit-destino').value,
+    modificado:true,
+    fechaModificacion:new Date().toISOString()
+  };
+  closeEdit();
+  updateSyncStatus('syncing');
+  try{
+    const res=await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(updated)});
+    const data=await res.json();
+    if(data.ok){showToast('✅ Cambios guardados en Sheets');updateSyncStatus('ok');loadRecords();}
+    else throw new Error();
+  } catch(e){showToast('❌ Error al guardar','error');updateSyncStatus('error');}
+}
+
+// =====================
+// ELIMINAR
+// =====================
+function openDelete(id){
+  const r=allRecords.find(x=>String(x.id)===String(id));
+  if(!r) return;
+  document.getElementById('delete-id').value=id;
+  document.getElementById('delete-info').innerHTML=`<strong>Partida #${r.partida}</strong><br>${r.producto||''}<br>${r.ingresa} → ${r.recibe}<br>A:${r.cuerosA||0} B:${r.cuerosB||0} C:${r.cuerosC||0}`;
+  document.getElementById('delete-modal').classList.add('open');
+}
+function closeDelete(){document.getElementById('delete-modal').classList.remove('open');}
+
+async function confirmDelete(){
+  const id=document.getElementById('delete-id').value;
+  closeDelete();
+  updateSyncStatus('syncing');
+  try{
+    const res=await fetch(WEBHOOK,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete',id:parseInt(id)})});
+    const data=await res.json();
+    if(data.ok){showToast('🗑️ Registro eliminado');updateSyncStatus('ok');loadRecords();}
+    else throw new Error();
+  } catch(e){showToast('❌ Error al eliminar','error');updateSyncStatus('error');}
+}
+
+// =====================
+// SCANNER
+// =====================
+function openScanner(){
+  document.getElementById('scanner-modal').classList.add('open');
+  scannerActive=true;
+  Quagga.init({
+    inputStream:{name:"Live",type:"LiveStream",target:document.getElementById('scanner-viewport'),
+      constraints:{facingMode:"environment",width:{ideal:1280},height:{ideal:720}}},
+    locator:{patchSize:"medium",halfSample:true},numOfWorkers:2,frequency:10,
+    decoder:{readers:["code_128_reader","ean_reader","ean_8_reader","code_39_reader","upc_reader"]},
+    locate:true
+  },err=>{
+    if(err){closeScanner();showToast('⚠️ No se pudo acceder a la cámara','error');return;}
+    Quagga.start();
+  });
+  let lastCode=null,lastTime=0;
+  Quagga.onDetected(result=>{
+    const code=result.codeResult.code;
+    const now=Date.now();
+    if(code===lastCode&&now-lastTime<2000) return;
+    lastCode=code;lastTime=now;
+    const flash=document.getElementById('scan-flash');
+    flash.style.display='block';setTimeout(()=>flash.style.display='none',400);
+    document.getElementById('partida').value=code;
+    closeScanner();showToast(`✅ Código: ${code}`);
+  });
+}
+function closeScanner(){
+  if(!scannerActive) return;
+  scannerActive=false;
+  try{Quagga.stop();}catch(e){}
+  document.getElementById('scanner-modal').classList.remove('open');
+}
+
+// =====================
+// VOZ
+// =====================
+let recognition=null,voiceTargetId=null,voiceActive=false;
+
+function startVoice(fieldId,fieldLabel){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('⚠️ Navegador no soporta voz','error');return;}
+  voiceTargetId=fieldId;voiceActive=true;
+  recognition=new SR();
+  recognition.lang='es-AR';recognition.continuous=false;recognition.interimResults=true;
+  document.getElementById('voice-field-label').textContent=`Dictando: ${fieldLabel}`;
+  document.getElementById('voice-transcript').textContent='Hablá ahora...';
   document.getElementById('voice-overlay').classList.add('open');
-  recognition.onresult = function(event) {
-    let interim = '', final = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      if (event.results[i].isFinal) final += event.results[i][0].transcript;
-      else interim += event.results[i][0].transcript;
+  recognition.onresult=e=>{
+    let interim='',final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) final+=e.results[i][0].transcript;
+      else interim+=e.results[i][0].transcript;
     }
-    document.getElementById('voice-transcript').textContent = final || interim || 'Escuchando...';
-    if (final) { document.getElementById(voiceTargetId).value = final.trim(); stopVoice(true); }
+    document.getElementById('voice-transcript').textContent=final||interim||'Escuchando...';
+    if(final){document.getElementById(voiceTargetId).value=final.trim();stopVoice(true);}
   };
-  recognition.onerror = function(e) {
+  recognition.onerror=e=>{
     stopVoice(false);
-    if (e.error==='not-allowed') showToast('⚠️ Permití el acceso al micrófono','error');
-    else showToast('⚠️ No se pudo escuchar, intentá de nuevo','error');
+    if(e.error==='not-allowed') showToast('⚠️ Permití el micrófono','error');
+    else showToast('⚠️ No se pudo escuchar','error');
   };
-  recognition.onend = function() { if(voiceActive) stopVoice(false); };
+  recognition.onend=()=>{if(voiceActive) stopVoice(false);};
   recognition.start();
 }
 
-function stopVoice(success) {
-  voiceActive = false;
+function stopVoice(success){
+  voiceActive=false;
   document.getElementById('voice-overlay').classList.remove('open');
-  if(recognition){try{recognition.stop();}catch(e){} recognition=null;}
-  if(success) {
+  if(recognition){try{recognition.stop();}catch(e){}recognition=null;}
+  if(success){
     showToast('✅ Texto guardado');
-    if(voiceTargetId === 'producto') {
-      const val = document.getElementById('producto').value;
-      setTimeout(() => filterProductos(val), 100);
-    }
+    if(voiceTargetId==='producto'){const v=document.getElementById('producto').value;setTimeout(()=>filterProductos(v),100);}
   }
 }
 
-updatePendingBanner();
-updateSyncStatus(webhookUrl?(pendingQueue.length>0?'error':'ok'):'none');
+// =====================
+// AUTO REFRESH (cada 60 seg si está en registros)
+// =====================
+setInterval(()=>{
+  if(document.getElementById('page-registros').classList.contains('active')) loadRecords();
+},60000);
+
+updateSyncStatus('ok');
 </script>
 </body>
 </html>
