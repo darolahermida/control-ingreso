@@ -10,6 +10,7 @@
   <title>Control de Rollos</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
   <style>
     :root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;--accent:#f0a500;--accent2:#e05c00;--green:#2ea043;--red:#da3633;--blue:#388bfd;--purple:#a371f7;--text:#e6edf3;--muted:#7d8590;--radius:10px}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -332,8 +333,14 @@
     <div class="scan-overlay">
       <div class="scan-frame"><div class="scan-line"></div></div>
     </div>
-    <p class="scan-hint">Apuntá la cámara al código de barras</p>
+    <p class="scan-hint" id="scan-hint">Apuntá la cámara al código de barras</p>
   </div>
+  <!-- Botón para capturar OCR -->
+  <div style="position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:12px;z-index:10">
+    <button onclick="capturarOCR()" style="background:var(--accent);border:none;border-radius:10px;color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;padding:12px 24px;cursor:pointer">📸 Leer Número</button>
+    <button onclick="toggleModoScanner()" id="btn-modo-scan" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:10px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;padding:12px 16px;cursor:pointer">🔄 Código de barras</button>
+  </div>
+  <canvas id="ocr-canvas" style="display:none"></canvas>
 </div>
 <div class="scan-success-flash" id="scan-flash"></div>
 
@@ -671,10 +678,20 @@ document.getElementById("numcli-salida").addEventListener("input", actualizarSto
 // ── SCANNER ──
 var scannerActive = false;
 var scannerTarget = null;
+var modoOCR = false;
+var videoStream = null;
 
 function abrirScanner(form) {
   scannerTarget = form;
+  modoOCR = false;
   document.getElementById("scanner-modal").classList.add("open");
+  document.getElementById("scan-hint").textContent = "Apuntá la cámara al código de barras";
+  document.getElementById("btn-modo-scan").textContent = "🔢 Leer número";
+  iniciarBarcode();
+}
+
+function iniciarBarcode() {
+  detenerVideo();
   scannerActive = true;
   Quagga.init({
     inputStream: {
@@ -687,7 +704,7 @@ function abrirScanner(form) {
     decoder: { readers: ["code_128_reader","ean_reader","ean_8_reader","code_39_reader","upc_reader","upc_e_reader","i2of5_reader"] },
     locate: true
   }, function(err) {
-    if (err) { cerrarScanner(); mostrarToast("⚠️ No se pudo acceder a la cámara","error"); return; }
+    if (err) { mostrarToast("⚠️ No se pudo acceder a la cámara","error"); return; }
     Quagga.start();
   });
   var lastCode = null, lastTime = 0;
@@ -696,25 +713,96 @@ function abrirScanner(form) {
     var now = Date.now();
     if (code === lastCode && now - lastTime < 2000) return;
     lastCode = code; lastTime = now;
-    // Solo números
-    var numCode = code.replace(/\D/g, "");
+    var numCode = code.replace(/[^0-9]/g, "");
     if (!numCode) return;
-    var flash = document.getElementById("scan-flash");
-    flash.style.display = "block";
-    setTimeout(function(){ flash.style.display = "none"; }, 400);
-    document.getElementById("numcli-" + scannerTarget).value = numCode;
-    document.getElementById("numcli-" + scannerTarget).dispatchEvent(new Event("input"));
-    if (scannerTarget === "salida") buscarPedido();
-    else filtrarSugerencias(scannerTarget);
+    flashSuccess();
+    completarCampo(numCode);
     cerrarScanner();
     mostrarToast("✅ Código leído: " + numCode);
   });
 }
 
-function cerrarScanner() {
-  if (!scannerActive) return;
-  scannerActive = false;
+function iniciarOCR() {
   try { Quagga.stop(); } catch(e) {}
+  scannerActive = false;
+  // Iniciar video manualmente para OCR
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+    .then(function(stream) {
+      videoStream = stream;
+      var vp = document.getElementById("scanner-viewport");
+      var video = vp.querySelector("video") || document.createElement("video");
+      video.srcObject = stream;
+      video.setAttribute("playsinline", true);
+      video.play();
+      if (!vp.contains(video)) vp.appendChild(video);
+    })
+    .catch(function(){ mostrarToast("⚠️ No se pudo acceder a la cámara","error"); });
+}
+
+function toggleModoScanner() {
+  modoOCR = !modoOCR;
+  if (modoOCR) {
+    document.getElementById("scan-hint").textContent = "Encuadrá el número y tocá 📸 Leer Número";
+    document.getElementById("btn-modo-scan").textContent = "📊 Código de barras";
+    iniciarOCR();
+  } else {
+    document.getElementById("scan-hint").textContent = "Apuntá la cámara al código de barras";
+    document.getElementById("btn-modo-scan").textContent = "🔢 Leer número";
+    detenerVideo();
+    iniciarBarcode();
+  }
+}
+
+function capturarOCR() {
+  var vp = document.getElementById("scanner-viewport");
+  var video = vp.querySelector("video");
+  if (!video) { mostrarToast("⚠️ Activá el modo Leer número primero","warn"); return; }
+  mostrarToast("🔍 Analizando...", "warn");
+  var canvas = document.getElementById("ocr-canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d").drawImage(video, 0, 0);
+  canvas.toBlob(function(blob) {
+    Tesseract.recognize(blob, "eng", { logger: function(){} })
+      .then(function(result) {
+        var texto = result.data.text;
+        // Extraer solo números de 3-6 dígitos
+        var matches = texto.match(/\d{3,6}/g);
+        if (matches && matches.length > 0) {
+          var numCode = matches[0];
+          flashSuccess();
+          completarCampo(numCode);
+          cerrarScanner();
+          mostrarToast("✅ Número leído: " + numCode);
+        } else {
+          mostrarToast("⚠️ No se detectó un número, intentá de nuevo","error");
+        }
+      })
+      .catch(function(){ mostrarToast("⚠️ Error al leer","error"); });
+  });
+}
+
+function completarCampo(numCode) {
+  document.getElementById("numcli-" + scannerTarget).value = numCode;
+  document.getElementById("numcli-" + scannerTarget).dispatchEvent(new Event("input"));
+  if (scannerTarget === "salida") buscarPedido();
+  else filtrarSugerencias(scannerTarget);
+}
+
+function flashSuccess() {
+  var flash = document.getElementById("scan-flash");
+  flash.style.display = "block";
+  setTimeout(function(){ flash.style.display = "none"; }, 400);
+}
+
+function detenerVideo() {
+  if (videoStream) { videoStream.getTracks().forEach(function(t){ t.stop(); }); videoStream = null; }
+  try { Quagga.stop(); } catch(e) {}
+}
+
+function cerrarScanner() {
+  detenerVideo();
+  scannerActive = false;
   document.getElementById("scanner-modal").classList.remove("open");
 }
 </script>
