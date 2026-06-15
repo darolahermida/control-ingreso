@@ -9,6 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Control Rollos">
   <title>Control de Rollos</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <style>
     :root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;--accent:#f0a500;--accent2:#e05c00;--green:#2ea043;--red:#da3633;--blue:#388bfd;--purple:#a371f7;--text:#e6edf3;--muted:#7d8590;--radius:10px}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -122,6 +123,23 @@
     #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--green);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.05em;padding:13px 24px;border-radius:30px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     #toast.error{background:var(--red)}#toast.warn{background:#7d5c00}
+
+    /* SCANNER */
+    #scanner-modal{display:none;position:fixed;inset:0;background:#000;z-index:999;flex-direction:column}
+    #scanner-modal.open{display:flex}
+    .scanner-header{background:rgba(0,0,0,.7);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:absolute;top:0;left:0;right:0;z-index:10}
+    .scanner-header span{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;text-transform:uppercase;color:var(--accent);letter-spacing:.08em}
+    .btn-close-scan{background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.4rem;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    #scanner-viewport{flex:1;position:relative;overflow:hidden}
+    #scanner-viewport video,#scanner-viewport canvas{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover}
+    .scan-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5}
+    .scan-frame{width:min(80vw,320px);height:140px;border:3px solid var(--accent);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);position:relative}
+    .scan-line{position:absolute;left:8px;right:8px;top:50%;height:2px;background:var(--accent);opacity:.8;animation:scanline 1.8s ease-in-out infinite}
+    @keyframes scanline{0%,100%{top:20%;opacity:1}50%{top:80%;opacity:.5}}
+    .scan-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;color:#fff;font-size:.85rem;opacity:.8}
+    .scan-success-flash{position:fixed;inset:0;background:rgba(46,160,67,.4);z-index:1000;display:none;animation:flash .4s ease;pointer-events:none}
+    @keyframes flash{0%{opacity:1}100%{opacity:0}}
+    .btn-scan{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:7px;color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;padding:0 14px;height:44px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0}
   </style>
 </head>
 <body>
@@ -156,6 +174,7 @@
         <div class="input-voice">
           <input type="text" id="numcli-ingreso" placeholder="Escribí el número..." inputmode="numeric" oninput="filtrarSugerencias('ingreso')" autocomplete="off">
           <button class="btn-voice" onclick="iniciarVoz('numcli-ingreso','numero')" title="Voz">🎤</button>
+          <button class="btn-scan" onclick="abrirScanner('ingreso')" title="Escanear">📷</button>
         </div>
         <div class="sug-list" id="sugs-ingreso"></div>
       </div>
@@ -219,6 +238,7 @@
         <div class="input-voice">
           <input type="text" id="numcli-salida" placeholder="Escribí el número..." inputmode="numeric" oninput="buscarPedido()" autocomplete="off">
           <button class="btn-voice" onclick="iniciarVoz('numcli-salida','numero')" title="Voz">🎤</button>
+          <button class="btn-scan" onclick="abrirScanner('salida')" title="Escanear">📷</button>
         </div>
         <div class="sug-list" id="sugs-salida"></div>
       </div>
@@ -301,6 +321,21 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- SCANNER MODAL -->
+<div id="scanner-modal">
+  <div class="scanner-header">
+    <span>📷 Escanear N° de Pedido</span>
+    <button class="btn-close-scan" onclick="cerrarScanner()">✕</button>
+  </div>
+  <div id="scanner-viewport">
+    <div class="scan-overlay">
+      <div class="scan-frame"><div class="scan-line"></div></div>
+    </div>
+    <p class="scan-hint">Apuntá la cámara al código de barras</p>
+  </div>
+</div>
+<div class="scan-success-flash" id="scan-flash"></div>
 
 <script>
 var GAS_URL = "https://script.google.com/macros/s/AKfycbzcM5DHgiy9ErkuzyEDg0tiPTiCQZ1UvYx9_1BGuH-SG8Siuo8ICrZIW5rv3vGbiv_EHw/exec";
@@ -632,6 +667,56 @@ function mostrarToast(msg,type){
 }
 
 document.getElementById("numcli-salida").addEventListener("input", actualizarStockPreview);
+
+// ── SCANNER ──
+var scannerActive = false;
+var scannerTarget = null;
+
+function abrirScanner(form) {
+  scannerTarget = form;
+  document.getElementById("scanner-modal").classList.add("open");
+  scannerActive = true;
+  Quagga.init({
+    inputStream: {
+      name: "Live", type: "LiveStream",
+      target: document.getElementById("scanner-viewport"),
+      constraints: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+    },
+    locator: { patchSize: "medium", halfSample: true },
+    numOfWorkers: 2, frequency: 10,
+    decoder: { readers: ["code_128_reader","ean_reader","ean_8_reader","code_39_reader","upc_reader","upc_e_reader","i2of5_reader"] },
+    locate: true
+  }, function(err) {
+    if (err) { cerrarScanner(); mostrarToast("⚠️ No se pudo acceder a la cámara","error"); return; }
+    Quagga.start();
+  });
+  var lastCode = null, lastTime = 0;
+  Quagga.onDetected(function(result) {
+    var code = result.codeResult.code;
+    var now = Date.now();
+    if (code === lastCode && now - lastTime < 2000) return;
+    lastCode = code; lastTime = now;
+    // Solo números
+    var numCode = code.replace(/\D/g, "");
+    if (!numCode) return;
+    var flash = document.getElementById("scan-flash");
+    flash.style.display = "block";
+    setTimeout(function(){ flash.style.display = "none"; }, 400);
+    document.getElementById("numcli-" + scannerTarget).value = numCode;
+    document.getElementById("numcli-" + scannerTarget).dispatchEvent(new Event("input"));
+    if (scannerTarget === "salida") buscarPedido();
+    else filtrarSugerencias(scannerTarget);
+    cerrarScanner();
+    mostrarToast("✅ Código leído: " + numCode);
+  });
+}
+
+function cerrarScanner() {
+  if (!scannerActive) return;
+  scannerActive = false;
+  try { Quagga.stop(); } catch(e) {}
+  document.getElementById("scanner-modal").classList.remove("open");
+}
 </script>
 </body>
 </html>
