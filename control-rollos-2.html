@@ -336,9 +336,10 @@
     <p class="scan-hint" id="scan-hint">Apuntá la cámara al código de barras</p>
   </div>
   <!-- Botón para capturar OCR -->
-  <div style="position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:12px;z-index:10">
-    <button onclick="capturarOCR()" style="background:var(--accent);border:none;border-radius:10px;color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;padding:12px 24px;cursor:pointer">📸 Leer Número</button>
-    <button onclick="toggleModoScanner()" id="btn-modo-scan" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:10px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;padding:12px 16px;cursor:pointer">🔄 Código de barras</button>
+  <div style="position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:10;flex-wrap:wrap;padding:0 10px">
+    <button onclick="capturarOCR()" style="background:var(--accent);border:none;border-radius:10px;color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.9rem;padding:12px 16px;cursor:pointer">📸 Capturar</button>
+    <button onclick="leerDesdeFoto()" style="background:var(--blue);border:none;border-radius:10px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.9rem;padding:12px 16px;cursor:pointer">🖼️ Desde foto</button>
+    <button onclick="toggleModoScanner()" id="btn-modo-scan" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:10px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;padding:12px 14px;cursor:pointer">🔄 Barras</button>
   </div>
   <canvas id="ocr-canvas" style="display:none"></canvas>
 </div>
@@ -754,22 +755,33 @@ function toggleModoScanner() {
 }
 
 function capturarOCR() {
+  // Usar video stream activo
   var vp = document.getElementById("scanner-viewport");
   var video = vp.querySelector("video");
-  if (!video) { mostrarToast("⚠️ Activá el modo Leer número primero","warn"); return; }
-  mostrarToast("🔍 Leyendo número...", "warn");
+  if (!video || !video.srcObject) {
+    mostrarToast("⚠️ Esperá que cargue la cámara","warn");
+    return;
+  }
+  mostrarToast("🔍 Procesando imagen...", "warn");
   var canvas = document.getElementById("ocr-canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext("2d").drawImage(video, 0, 0);
-  var base64 = canvas.toDataURL("image/jpeg", 0.8).split(",")[1];
-  
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  var ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  var base64 = canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
+  leerNumeroConClaude(base64);
+}
+
+function leerNumeroConClaude(base64) {
   fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 100,
+      max_tokens: 50,
       messages: [{
         role: "user",
         content: [
@@ -779,7 +791,7 @@ function capturarOCR() {
           },
           {
             type: "text",
-            text: "En esta imagen hay un número de pedido escrito a mano o impreso. Respondé ÚNICAMENTE con el número, sin texto adicional, sin puntos, sin espacios. Si hay varios números, elegí el más prominente de 3 a 6 dígitos."
+            text: "Hay un número de pedido escrito a mano o impreso en esta imagen. Respondé SOLO con ese número (3-6 dígitos), sin texto adicional."
           }
         ]
       }]
@@ -795,10 +807,32 @@ function capturarOCR() {
       cerrarScanner();
       mostrarToast("✅ Número leído: " + numCode);
     } else {
-      mostrarToast("⚠️ No se pudo leer el número, intentá de nuevo","error");
+      mostrarToast("⚠️ No se detectó número, intentá de nuevo","error");
     }
   })
-  .catch(function(){ mostrarToast("⚠️ Error al procesar la imagen","error"); });
+  .catch(function(e){ 
+    mostrarToast("⚠️ Error: " + e.message,"error"); 
+  });
+}
+
+// Función para leer desde foto del carrete
+function leerDesdeFoto() {
+  var input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.capture = "environment";
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    mostrarToast("🔍 Procesando foto...", "warn");
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var base64 = ev.target.result.split(",")[1];
+      leerNumeroConClaude(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
 }
 
 function completarCampo(numCode) {
