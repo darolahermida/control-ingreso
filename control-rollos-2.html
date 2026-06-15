@@ -10,7 +10,7 @@
   <title>Control de Rollos</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+
   <style>
     :root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;--accent:#f0a500;--accent2:#e05c00;--green:#2ea043;--red:#da3633;--blue:#388bfd;--purple:#a371f7;--text:#e6edf3;--muted:#7d8590;--radius:10px}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -757,29 +757,48 @@ function capturarOCR() {
   var vp = document.getElementById("scanner-viewport");
   var video = vp.querySelector("video");
   if (!video) { mostrarToast("⚠️ Activá el modo Leer número primero","warn"); return; }
-  mostrarToast("🔍 Analizando...", "warn");
+  mostrarToast("🔍 Leyendo número...", "warn");
   var canvas = document.getElementById("ocr-canvas");
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   canvas.getContext("2d").drawImage(video, 0, 0);
-  canvas.toBlob(function(blob) {
-    Tesseract.recognize(blob, "eng", { logger: function(){} })
-      .then(function(result) {
-        var texto = result.data.text;
-        // Extraer solo números de 3-6 dígitos
-        var matches = texto.match(/\d{3,6}/g);
-        if (matches && matches.length > 0) {
-          var numCode = matches[0];
-          flashSuccess();
-          completarCampo(numCode);
-          cerrarScanner();
-          mostrarToast("✅ Número leído: " + numCode);
-        } else {
-          mostrarToast("⚠️ No se detectó un número, intentá de nuevo","error");
-        }
-      })
-      .catch(function(){ mostrarToast("⚠️ Error al leer","error"); });
-  });
+  var base64 = canvas.toDataURL("image/jpeg", 0.8).split(",")[1];
+  
+  fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 100,
+      messages: [{
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: { type: "base64", media_type: "image/jpeg", data: base64 }
+          },
+          {
+            type: "text",
+            text: "En esta imagen hay un número de pedido escrito a mano o impreso. Respondé ÚNICAMENTE con el número, sin texto adicional, sin puntos, sin espacios. Si hay varios números, elegí el más prominente de 3 a 6 dígitos."
+          }
+        ]
+      }]
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    var texto = data.content && data.content[0] ? data.content[0].text.trim() : "";
+    var numCode = texto.replace(/[^0-9]/g, "");
+    if (numCode && numCode.length >= 3) {
+      flashSuccess();
+      completarCampo(numCode);
+      cerrarScanner();
+      mostrarToast("✅ Número leído: " + numCode);
+    } else {
+      mostrarToast("⚠️ No se pudo leer el número, intentá de nuevo","error");
+    }
+  })
+  .catch(function(){ mostrarToast("⚠️ Error al procesar la imagen","error"); });
 }
 
 function completarCampo(numCode) {
