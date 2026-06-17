@@ -272,6 +272,9 @@
 <!-- HISTORIAL -->
 <div id="page-historial" class="page">
   <div class="section-title">🕘 Últimos Movimientos</div>
+  <div class="card" style="padding:12px">
+    <input type="text" id="buscador-historial" placeholder="🔍 Buscar por N° de pedido o cliente..." inputmode="numeric" oninput="filtrarHistorial()" autocomplete="off" style="margin-bottom:0">
+  </div>
   <div class="card">
     <ul class="mov-list" id="mov-list"><div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div></ul>
   </div>
@@ -589,6 +592,16 @@ function renderInventario(rows) {
 function cargarHistorial() {
   document.getElementById("mov-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div>';
   llamar("obtenerMovimientos").then(function(res){ historialData=res.rows||[]; renderHistorial(historialData); });
+}
+
+function filtrarHistorial() {
+  var val = document.getElementById("buscador-historial").value.trim().toLowerCase();
+  if (!val) { renderHistorial(historialData); return; }
+  var filtrado = historialData.filter(function(r){
+    return r.numCliente.toString().includes(val) || 
+           r.cliente.toLowerCase().includes(val);
+  });
+  renderHistorial(filtrado);
 }
 
 function renderHistorial(rows) {
