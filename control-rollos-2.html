@@ -889,8 +889,10 @@ function cerrarScanner() {
 
 // Registrar Service Worker para PWA (offline + installable)
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(function(reg) {
-    console.log('✅ Service Worker registrado');
+  // Detectar si estamos en GitHub Pages o servidor local
+  var swPath = window.location.pathname.includes('/control-ingreso/') ? '/control-ingreso/sw.js' : '/sw.js';
+  navigator.serviceWorker.register(swPath).then(function(reg) {
+    console.log('✅ Service Worker registrado:', swPath);
   }).catch(function(err) {
     console.log('⚠️ Service Worker error:', err);
   });

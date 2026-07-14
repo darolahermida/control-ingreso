@@ -2,27 +2,27 @@
   "name": "Control de Rollos - La Hermida",
   "short_name": "Control Rollos",
   "description": "Sistema de control de inventario de rollos para La Hermida",
-  "start_url": "/control-ingreso/control-rollos-2.html",
-  "scope": "/control-ingreso/",
+  "start_url": "./control-rollos-2.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#F8F6F2",
   "theme_color": "#C9A96E",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/control-ingreso/logo-192.png",
+      "src": "./logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/control-ingreso/logo-512.png",
+      "src": "./logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/control-ingreso/apple-touch-icon.png",
+      "src": "./apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
