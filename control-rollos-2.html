@@ -886,6 +886,15 @@ function cerrarScanner() {
   scannerActive = false;
   document.getElementById("scanner-modal").classList.remove("open");
 }
+
+// Registrar Service Worker para PWA (offline + installable)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
+    console.log('✅ Service Worker registrado');
+  }).catch(function(err) {
+    console.log('⚠️ Service Worker error:', err);
+  });
+}
 </script>
 </body>
 </html>
