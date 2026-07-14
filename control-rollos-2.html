@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0d1117">
+  <meta name="theme-color" content="#F8F6F2">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Control Rollos">
@@ -12,10 +12,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 
   <style>
-    :root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;--accent:#f0a500;--accent2:#e05c00;--green:#2ea043;--red:#da3633;--blue:#388bfd;--purple:#a371f7;--text:#e6edf3;--muted:#7d8590;--radius:10px}
+    :root{--bg:#F8F6F2;--surface:#FFFFFF;--surface2:#F7F2EA;--border:#E8D5B0;--accent:#C9A96E;--accent2:#9E7A4A;--green:#2ea043;--red:#da3633;--blue:#388bfd;--purple:#a371f7;--text:#1A1A1A;--muted:#999999;--radius:10px}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100dvh;overflow-x:hidden}
-    header{background:var(--surface);border-bottom:2px solid var(--accent);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+    header{background:var(--surface);border-bottom:2px solid var(--accent);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.05)}
     .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
     header h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;text-transform:uppercase;letter-spacing:.05em;line-height:1.2;flex:1}
     header h1 span{display:block;font-size:.7rem;font-weight:400;letter-spacing:.1em;color:var(--muted)}
@@ -26,11 +26,11 @@
     .page{display:none;padding:18px;padding-bottom:32px}.page.active{display:block}
     .section-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px}
     .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
     .field{margin-bottom:13px}.field:last-child{margin-bottom:0}
     label{display:block;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-    input,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'Barlow',sans-serif;font-size:1rem;padding:11px 14px;outline:none;transition:border-color .2s;-webkit-appearance:none}
-    input:focus,select:focus{border-color:var(--accent)}
+    input,select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:7px;color:var(--text);font-family:'Barlow',sans-serif;font-size:1rem;padding:11px 14px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(201,169,110,.15)}
     select option{background:var(--surface2)}
     input::placeholder{color:var(--muted)}
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
@@ -39,12 +39,12 @@
     .input-voice{display:flex;gap:8px;align-items:center}
     .input-voice input{flex:1}
     .btn-voice{width:44px;height:44px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
-    .btn-voice.escuchando{background:rgba(218,54,51,.2);border-color:var(--red);color:var(--red);animation:pulseVoz 1s infinite}
+    .btn-voice.escuchando{background:rgba(201,169,110,.2);border-color:var(--accent);color:var(--accent);animation:pulseVoz 1s infinite}
     @keyframes pulseVoz{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 
     /* TIPO */
     .tipo-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-    .tipo-btn{background:var(--bg);border:2px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;padding:16px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s}
+    .tipo-btn{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;padding:16px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s}
     .tipo-btn .icon{font-size:1.8rem}
     .tipo-btn.sel-envio{background:rgba(46,160,67,.12);border-color:var(--green);color:var(--green)}
     .tipo-btn.sel-desarme{background:rgba(163,113,247,.12);border-color:var(--purple);color:var(--purple)}
@@ -399,7 +399,7 @@ function mostrarPagina(nombre, tabEl) {
   tabEl.classList.add("active");
   if (nombre==="inventario") cargarInventario();
   if (nombre==="historial") cargarHistorial();
-  if (nombre==="salida") { llamar("obtenerInventario").then(function(res){ inventario=res.rows||[]; }); }
+  if (nombre==="salida") { refrescarInventario(); }
 }
 
 function selTipo(tipo) {
@@ -566,13 +566,45 @@ function limpiarSalida() {
   document.querySelectorAll(".transport-btn").forEach(function(b){ b.classList.remove("selected"); });
 }
 
-function cargarInventario() {
-  document.getElementById("stock-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div>';
-  llamar("obtenerInventario").then(function(res){ inventario=res.rows||[]; renderInventario(inventario); });
+// Fallback: calcula el stock por pedido a partir de los movimientos.
+// INGRESO suma; ENVIO/DESARME restan; ELIMINADO se ignora. Se clampea a >=0 porque
+// obtenerMovimientos solo devuelve los últimos ~60 movimientos: para pedidos viejos el
+// INGRESO puede quedar fuera de la ventana y daría un negativo falso.
+function calcInventario(movs) {
+  var map = {};
+  (movs||[]).forEach(function(r){
+    if (r.tipo === "ELIMINADO") return;
+    var k = String(r.numCliente);
+    if (!map[k]) map[k] = { numCliente: r.numCliente, cliente: r.cliente, stock: 0 };
+    var c = Number(r.cantidad) || 0;
+    map[k].stock += (r.tipo === "INGRESO" ? c : -c);
+    if (r.cliente) map[k].cliente = r.cliente;
+  });
+  return Object.keys(map).map(function(k){ map[k].stock = Math.max(0, map[k].stock); return map[k]; });
 }
 
-function renderInventario(rows) {
+// Refresca el inventario global. Usa el backend obtenerInventario (que recorre toda la
+// planilla) si está disponible; si no responde (la función no está en el deployment actual
+// del GAS), cae al cálculo desde los últimos movimientos para no quedar sin stock.
+function refrescarInventario() {
+  return llamar("obtenerInventario").then(function(res){
+    if (res && res.ok && Array.isArray(res.rows)) { inventario = res.rows; return inventario; }
+    return llamar("obtenerMovimientos").then(function(m){
+      inventario = calcInventario(m && m.rows ? m.rows : []);
+      return inventario;
+    });
+  });
+}
+
+function cargarInventario() {
+  document.getElementById("stock-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div>';
+  refrescarInventario().then(function(){ renderInventario(inventario); });
+}
+
+function renderInventario(rowsAll) {
   var list=document.getElementById("stock-list");
+  // En el listado de Stock solo mostramos pedidos con stock disponible (>0), de mayor a menor.
+  var rows=(rowsAll||[]).filter(function(r){return r.stock>0;}).sort(function(a,b){return b.stock-a.stock;});
   if (!rows||!rows.length) {
     list.innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>Sin datos aún</p></div>';
     ["stat-clientes","stat-total","stat-bajos"].forEach(function(id){document.getElementById(id).textContent="0";});
