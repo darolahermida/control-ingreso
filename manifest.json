@@ -2,7 +2,7 @@
   "name": "Control de Rollos - La Hermida",
   "short_name": "Control Rollos",
   "description": "Sistema de control de inventario de rollos para La Hermida",
-  "start_url": "./control-rollos-2.html",
+  "start_url": "./control-rollos-2.html?v=2024",
   "scope": "./",
   "display": "standalone",
   "background_color": "#FFFFFF",
