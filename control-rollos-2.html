@@ -367,6 +367,39 @@ window.addEventListener("online", function(){
   });
 });
 
+// Actualizar Service Worker automáticamente
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistration().then(function(reg) {
+    if (reg) {
+      // Verificar actualizaciones cada 60 segundos
+      setInterval(function() {
+        reg.update().catch(function(err) {
+          // Sin errores si falla
+        });
+      }, 60000);
+
+      // Si hay una actualización pendiente, recargar la página
+      var swWaiting = reg.waiting;
+      if (swWaiting) {
+        swWaiting.postMessage({type: 'SKIP_WAITING'});
+        window.location.reload();
+      }
+
+      // Escuchar nuevas versiones del Service Worker
+      reg.addEventListener('updatefound', function() {
+        var newWorker = reg.installing;
+        newWorker.addEventListener('statechange', function() {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Nueva versión disponible
+            newWorker.postMessage({type: 'SKIP_WAITING'});
+            window.location.reload();
+          }
+        });
+      });
+    }
+  });
+}
+
 // ── VOZ ──
 var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 var reconActivo = null;
