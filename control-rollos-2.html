@@ -280,7 +280,8 @@
 <div id="page-historial" class="page">
   <div class="section-title">🕘 Últimos Movimientos</div>
   <div class="card" style="padding:12px">
-    <input type="text" id="buscador-historial" placeholder="🔍 Buscar por N° de pedido o cliente..." inputmode="numeric" oninput="filtrarHistorial()" autocomplete="off" style="margin-bottom:0">
+    <input type="text" id="buscador-historial" placeholder="🔍 Buscar por N° de pedido o cliente..." inputmode="numeric" oninput="filtrarHistorial()" autocomplete="off" style="margin-bottom:8px">
+    <button class="btn-submit gris" id="btn-sincronizar" onclick="sincronizarAhora()" style="margin-top:0"><span>🔄 Sincronizar ahora</span></button>
   </div>
   <div class="card">
     <ul class="mov-list" id="mov-list"><div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div></ul>
@@ -539,6 +540,46 @@ function sincronizarDatos() {
     console.error("Error sincronizando:", e);
     return Promise.resolve();
   }
+}
+
+function sincronizarAhora() {
+  var btn = document.getElementById("btn-sincronizar");
+  if (!btn) return;
+
+  setLoading(btn, true, "dark");
+  mostrarToast("🔄 Sincronizando...", "warn");
+
+  // Primero sincronizar datos pendientes
+  sincronizarDatos().then(function() {
+    // Luego forzar recarga desde Google Sheets
+    return Promise.all([
+      llamar("obtenerClientes").then(function(res) {
+        if (res && res.clientes) {
+          clientes = res.clientes;
+          localStorage.setItem("control_rollos_clientes", JSON.stringify(clientes));
+        }
+      }),
+      llamar("obtenerMovimientos").then(function(res) {
+        if (res && res.rows) {
+          historialData = res.rows;
+          localStorage.setItem("control_rollos_historial", JSON.stringify(historialData));
+          renderHistorial(historialData);
+        }
+      }),
+      llamar("obtenerInventario").then(function(res) {
+        if (res && res.inventario) {
+          inventario = res.inventario;
+          localStorage.setItem("control_rollos_inventario", JSON.stringify(inventario));
+        }
+      })
+    ]);
+  }).then(function() {
+    setLoading(btn, false);
+    mostrarToast("✅ Sincronizado correctamente", "ok");
+  }).catch(function(err) {
+    setLoading(btn, false);
+    mostrarToast("❌ Error al sincronizar: " + err, "error");
+  });
 }
 
 function cargarClientes() {
