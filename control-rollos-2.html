@@ -509,32 +509,53 @@ function guardarLocalmente(action, params) {
 function sincronizarDatos() {
   try {
     var cola = JSON.parse(localStorage.getItem("control_rollos_cola") || "[]");
-    if (!cola.length) return Promise.resolve();
+    console.log("Cola de sincronización:", cola);
 
-    // Intentar sincronizar cada item de la cola
-    var promesas = cola.map(function(item, idx) {
-      return llamar(item.action, item.data).then(function(res) {
-        // Marcar como sincronizado si tuvo éxito
-        if (res.ok || !res.offline) {
-          cola.splice(idx, 1);
-          return true;
-        }
-        return false;
-      }).catch(function() {
-        return false;
+    if (!cola.length) {
+      console.log("Cola vacía, nada que sincronizar");
+      return Promise.resolve();
+    }
+
+    // Sincronizar items uno por uno
+    var sinc = Promise.resolve();
+    cola.forEach(function(item) {
+      sinc = sinc.then(function() {
+        console.log("Sincronizando:", item.action, item.data);
+        return llamar(item.action, item.data).then(function(res) {
+          console.log("Respuesta:", res);
+          return res;
+        });
       });
     });
 
-    return Promise.all(promesas).then(function() {
-      // Guardar la cola actualizada (sin los items sincronizados)
-      localStorage.setItem("control_rollos_cola", JSON.stringify(cola));
-
-      // Recargar datos desde Google Sheets
-      if (cola.length === 0) {
-        cargarHistorial();
-        cargarInventario();
-        cargarClientes();
-      }
+    return sinc.then(function() {
+      // Recargar datos frescos desde Google Sheets
+      console.log("Recargando datos frescos...");
+      return Promise.all([
+        new Promise(function(resolve) {
+          llamar("obtenerMovimientos").then(function(res) {
+            if (res && res.rows) {
+              historialData = res.rows;
+              renderHistorial(historialData);
+              console.log("Historial recargado:", historialData.length, "registros");
+            }
+            resolve();
+          });
+        }),
+        new Promise(function(resolve) {
+          llamar("obtenerClientes").then(function(res) {
+            if (res && res.clientes) {
+              clientes = res.clientes;
+              console.log("Clientes recargados:", clientes.length);
+            }
+            resolve();
+          });
+        })
+      ]).then(function() {
+        // Limpiar la cola si todo fue exitoso
+        localStorage.setItem("control_rollos_cola", JSON.stringify([]));
+        console.log("✅ Sincronización completada");
+      });
     });
   } catch(e) {
     console.error("Error sincronizando:", e);
