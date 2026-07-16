@@ -1151,33 +1151,59 @@ function renderInventario(rowsAll) {
 }
 
 function cargarHistorial() {
-  console.log("=== CARGANDO HISTORIAL DESDE GOOGLE APPS SCRIPT ===");
+  console.log("=== CARGANDO HISTORIAL DESDE GOOGLE SHEETS ===");
   document.getElementById("mov-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando datos...</p></div>';
   document.getElementById("buscador-historial").value = "";
 
-  var gasUrl = APPS_SCRIPT_URL + "?action=obtenerMovimientos";
+  // Leer directamente desde Google Sheets CSV
+  var sheetId = "1rGgoT4Bpip8ISdasvsGG-zuSNm2ruuESgHilTpXZXfI";
+  var gid = "947467091"; // Tabla_1
+  var csvUrl = "https://docs.google.com/spreadsheets/d/" + sheetId + "/export?format=csv&gid=" + gid;
 
-  fetch(gasUrl)
+  fetch(csvUrl)
     .then(function(response) {
-      console.log("Estado de respuesta:", response.status);
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status);
-      }
-      return response.json();
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.text();
     })
-    .then(function(res) {
-      console.log("Respuesta de Google Apps Script:", res);
+    .then(function(csv) {
+      console.log("CSV recibido, primeros 500 caracteres:", csv.substring(0, 500));
 
-      if (res && res.ok && res.rows && res.rows.length > 0) {
-        historialData = res.rows;
-        console.log("✅ Historial cargado:", historialData.length, "registros");
-        mostrarToast("✅ " + historialData.length + " registros cargados", "ok");
-      } else {
-        historialData = [];
-        console.log("⚠️ Sin datos en Google Sheets");
-        mostrarToast("⚠️ Sin datos en Google Sheets", "warn");
+      var lineas = csv.split("\n");
+      console.log("Total de líneas:", lineas.length);
+
+      if (lineas.length < 2) {
+        throw new Error("Sin datos en Google Sheets");
       }
 
+      historialData = [];
+
+      for (var i = 1; i < lineas.length; i++) {
+        var linea = lineas[i].trim();
+        if (!linea) continue;
+
+        // Parsear CSV - las columnas son:
+        // A=Fecha, B=Hora, C=Día, D=N° Cliente, E=Cantidad, F=Cliente, G=Rollo, H=Transporte, I=Situacion, J=Fecha final
+        var cols = linea.split(",");
+
+        if (cols.length < 6) continue;
+        if (!cols[3] || cols[3].trim() === "") continue; // N° Cliente (columna D, índice 3)
+
+        historialData.push({
+          fecha: cols[0] ? cols[0].trim() : "",
+          hora: cols[1] ? cols[1].trim() : "",
+          dia: cols[2] ? cols[2].trim() : "",
+          numCliente: cols[3] ? cols[3].trim() : "",
+          cantidad: cols[4] ? parseInt(cols[4].trim()) : 0,
+          cliente: cols[5] ? cols[5].trim() : "",
+          tipo: cols[6] ? cols[6].trim() : "INGRESO",
+          usuario: "",
+          transporte: cols[7] ? cols[7].trim() : "",
+          estado: cols[8] ? cols[8].trim() : ""
+        });
+      }
+
+      console.log("✅ Historial cargado:", historialData.length, "registros");
+      mostrarToast("✅ " + historialData.length + " registros cargados", "ok");
       renderHistorial(historialData);
     })
     .catch(function(err) {
