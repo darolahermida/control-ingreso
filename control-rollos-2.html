@@ -762,13 +762,33 @@ function eliminarRegistro() {
   var fila = document.getElementById("edit-fila").value;
   var cliente = document.getElementById("edit-cliente").value;
   if (!confirm) { mostrarToast("⚠️ No se pudo confirmar","error"); return; }
+
+  var datosEliminar = { fila: fila, cliente: cliente };
+
+  // Guardar localmente primero
+  guardarLocalmente("eliminarMovimiento", datosEliminar);
+
   var btn = document.querySelector('[onclick="eliminarRegistro()"]');
   setLoading(btn, true, "white");
-  llamar("eliminarMovimiento", { fila: fila, cliente: cliente }).then(function(res){
+
+  llamar("eliminarMovimiento", datosEliminar).then(function(res){
     setLoading(btn, false);
     btn.innerHTML = "<span>🗑️ Eliminar Registro</span>";
-    mostrarToast(res.msg||(res.ok?"✅ Eliminado":"❌ Error"), res.ok?"ok":"error");
-    if(res.ok){ cerrarModal(); cargarHistorial(); cargarInventario(); }
+
+    if (res.offline) {
+      // Offline: mostrar mensaje pero permitir continuar
+      mostrarToast("✅ Registro marcado para eliminar (sin conexión)", "ok");
+      cerrarModal();
+      cargarHistorial();
+      cargarInventario();
+    } else if (res.ok) {
+      mostrarToast("✅ Eliminado", "ok");
+      cerrarModal();
+      cargarHistorial();
+      cargarInventario();
+    } else {
+      mostrarToast("❌ Error: " + res.msg, "error");
+    }
   });
 }
 
@@ -782,11 +802,30 @@ function guardarEdicion() {
     dia: document.getElementById("edit-dia").value
   };
   if (!datos.numCliente||!datos.cliente||!datos.cantidad) { mostrarToast("⚠️ Completá todos los campos","error"); return; }
-  var btn = document.getElementById("btn-guardar-edit"); setLoading(btn,true,"dark");
-  llamar("editarMovimiento",datos).then(function(res){
+
+  // Guardar localmente primero
+  guardarLocalmente("editarMovimiento", datos);
+
+  var btn = document.getElementById("btn-guardar-edit");
+  setLoading(btn,true,"dark");
+
+  // Intentar enviar a Google Sheets
+  llamar("editarMovimiento", datos).then(function(res){
     setLoading(btn,false);
-    mostrarToast(res.msg||(res.ok?"✅ Guardado":"❌ Error"),res.ok?"ok":"error");
-    if(res.ok){ cerrarModal(); cargarHistorial(); cargarInventario(); }
+    if (res.offline) {
+      // Offline: mostrar mensaje pero permitir continuar
+      mostrarToast("✅ Cambios guardados en celular (sin conexión)", "ok");
+      cerrarModal();
+      cargarHistorial();
+      cargarInventario();
+    } else if (res.ok) {
+      mostrarToast("✅ Guardado", "ok");
+      cerrarModal();
+      cargarHistorial();
+      cargarInventario();
+    } else {
+      mostrarToast("❌ Error: " + res.msg, "error");
+    }
   });
 }
 
