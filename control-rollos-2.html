@@ -1155,26 +1155,37 @@ function cargarHistorial() {
   document.getElementById("mov-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando datos...</p></div>';
   document.getElementById("buscador-historial").value = "";
 
-  llamar("obtenerMovimientos").then(function(res){
-    console.log("Respuesta de Google Apps Script:", res);
+  var gasUrl = APPS_SCRIPT_URL + "?action=obtenerMovimientos";
 
-    if (res && res.ok && res.rows && res.rows.length > 0) {
-      historialData = res.rows;
-      console.log("✅ Historial cargado:", historialData.length, "registros");
-      mostrarToast("✅ " + historialData.length + " registros cargados", "ok");
-    } else {
+  fetch(gasUrl)
+    .then(function(response) {
+      console.log("Estado de respuesta:", response.status);
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status);
+      }
+      return response.json();
+    })
+    .then(function(res) {
+      console.log("Respuesta de Google Apps Script:", res);
+
+      if (res && res.ok && res.rows && res.rows.length > 0) {
+        historialData = res.rows;
+        console.log("✅ Historial cargado:", historialData.length, "registros");
+        mostrarToast("✅ " + historialData.length + " registros cargados", "ok");
+      } else {
+        historialData = [];
+        console.log("⚠️ Sin datos en Google Sheets");
+        mostrarToast("⚠️ Sin datos en Google Sheets", "warn");
+      }
+
+      renderHistorial(historialData);
+    })
+    .catch(function(err) {
+      console.error("❌ Error cargando historial:", err);
+      mostrarToast("❌ Error: " + err, "error");
       historialData = [];
-      console.log("⚠️ Sin datos en Google Sheets");
-      mostrarToast("⚠️ Sin datos en Google Sheets", "warn");
-    }
-
-    renderHistorial(historialData);
-  }).catch(function(err) {
-    console.error("❌ Error cargando historial:", err);
-    mostrarToast("❌ Error: " + err, "error");
-    historialData = [];
-    renderHistorial(historialData);
-  });
+      renderHistorial(historialData);
+    });
 }
 
 function cargarFuerza() {
