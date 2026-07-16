@@ -1150,33 +1150,67 @@ function renderInventario(rowsAll) {
 }
 
 function cargarHistorial() {
-  console.log("=== CARGANDO HISTORIAL ===");
+  console.log("=== CARGANDO HISTORIAL DESDE CSV ===");
   document.getElementById("mov-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando datos...</p></div>';
   document.getElementById("buscador-historial").value = "";
 
-  llamar("obtenerMovimientos").then(function(res){
-    console.log("Respuesta de Google Sheets:", res);
-    console.log("¿Hay datos?", res ? "sí" : "no");
-    console.log("¿Hay rows?", res && res.rows ? "sí" : "no");
-    console.log("¿Cuántos rows?", res && res.rows ? res.rows.length : "N/A");
+  // URL de Google Sheets en formato CSV
+  var csvUrl = "https://docs.google.com/spreadsheets/d/1rGgoT4Bpip8ISdasvsGG-zuSNm2ruuESgHilTpXZXfI/export?format=csv&gid=947467091";
 
-    if (res && res.rows && res.rows.length > 0) {
-      historialData = res.rows;
+  fetch(csvUrl)
+    .then(function(response) {
+      console.log("Respuesta del CSV:", response.status);
+      return response.text();
+    })
+    .then(function(csv) {
+      console.log("CSV cargado, primeros 200 caracteres:", csv.substring(0, 200));
+
+      // Parsear CSV
+      var lineas = csv.split("\n");
+      console.log("Total de líneas:", lineas.length);
+
+      if (lineas.length < 2) {
+        console.log("⚠️ Sin datos en el CSV");
+        historialData = [];
+        mostrarToast("⚠️ Sin datos en Google Sheets", "warn");
+        renderHistorial(historialData);
+        return;
+      }
+
+      // Procesar datos
+      historialData = [];
+      for (var i = 1; i < lineas.length; i++) {
+        var linea = lineas[i].trim();
+        if (!linea) continue;
+
+        // Parsear CSV (simple)
+        var cols = linea.split(",");
+        if (cols.length < 3) continue;
+
+        historialData.push({
+          fecha: cols[0] ? cols[0].trim() : "",
+          hora: cols[1] ? cols[1].trim() : "",
+          dia: cols[2] ? cols[2].trim() : "",
+          numCliente: cols[3] ? cols[3].trim() : "",
+          cliente: cols[4] ? cols[4].trim() : "",
+          cantidad: cols[5] ? parseInt(cols[5].trim()) : 0,
+          tipo: cols[6] ? cols[6].trim() : "",
+          usuario: cols[7] ? cols[7].trim() : "",
+          transporte: cols[8] ? cols[8].trim() : "",
+          estado: cols[9] ? cols[9].trim() : ""
+        });
+      }
+
       console.log("✅ Historial cargado:", historialData.length, "registros");
       mostrarToast("✅ " + historialData.length + " registros cargados", "ok");
-    } else {
+      renderHistorial(historialData);
+    })
+    .catch(function(err) {
+      console.error("❌ Error cargando CSV:", err);
+      mostrarToast("❌ Error: " + err, "error");
       historialData = [];
-      console.log("⚠️ Sin datos en Google Sheets o respuesta vacía");
-      mostrarToast("⚠️ Sin datos en Google Sheets", "warn");
-    }
-
-    renderHistorial(historialData);
-  }).catch(function(err) {
-    console.error("❌ Error cargando historial:", err);
-    mostrarToast("❌ Error: " + err, "error");
-    historialData = [];
-    renderHistorial(historialData);
-  });
+      renderHistorial(historialData);
+    });
 }
 
 function cargarFuerza() {
