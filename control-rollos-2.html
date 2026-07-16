@@ -356,7 +356,7 @@
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
       <button class="btn-submit gris" id="btn-recargar" onclick="cargarHistorial()" style="margin-top:0"><span>⬇️ Recargar</span></button>
       <button class="btn-submit gris" id="btn-sincronizar" onclick="sincronizarAhora()" style="margin-top:0"><span>🔄 Sincronizar</span></button>
-      <button class="btn-submit gris" id="btn-limpiar" onclick="limpiarDuplicados()" style="margin-top:0"><span>🧹 Limpiar</span></button>
+      <button class="btn-submit gris" id="btn-fuerza" onclick="cargarFuerza()" style="margin-top:0"><span>💪 Fuerza</span></button>
     </div>
   </div>
   <div class="card">
@@ -1176,6 +1176,69 @@ function cargarHistorial() {
     mostrarToast("❌ Error: " + err, "error");
     historialData = [];
     renderHistorial(historialData);
+  });
+}
+
+function cargarFuerza() {
+  console.log("=== CARGA FUERZA ===");
+  var btn = document.getElementById("btn-fuerza");
+  setLoading(btn, true, "dark");
+  mostrarToast("💪 Intentando carga fuerza...", "warn");
+
+  // Intentar 1: Obtener datos frescos
+  console.log("Intento 1: obtenerMovimientos");
+  llamar("obtenerMovimientos").then(function(res) {
+    console.log("Respuesta 1:", res);
+
+    if (res && res.rows && res.rows.length > 0) {
+      console.log("✅ Éxito en intento 1:", res.rows.length, "registros");
+      historialData = res.rows;
+      renderHistorial(historialData);
+      setLoading(btn, false);
+      mostrarToast("✅ Cargados " + res.rows.length + " registros", "ok");
+      return;
+    }
+
+    // Intentar 2: Si falla, intentar obtenerInventario
+    console.log("Intento 2: obtenerInventario");
+    return llamar("obtenerInventario").then(function(res2) {
+      console.log("Respuesta 2:", res2);
+
+      if (res2 && res2.rows && res2.rows.length > 0) {
+        console.log("✅ Éxito en intento 2:", res2.rows.length, "registros");
+        historialData = res2.rows;
+        renderHistorial(historialData);
+        setLoading(btn, false);
+        mostrarToast("✅ Cargados " + res2.rows.length + " registros (desde inventario)", "ok");
+        return;
+      }
+
+      // Intento 3: Mostrar lo que hay en localStorage
+      console.log("Intento 3: Usando localStorage");
+      var localData = localStorage.getItem("control_rollos_historial");
+      if (localData) {
+        var parsed = JSON.parse(localData);
+        if (parsed && parsed.length > 0) {
+          console.log("✅ Éxito en intento 3:", parsed.length, "registros en localStorage");
+          historialData = parsed;
+          renderHistorial(historialData);
+          setLoading(btn, false);
+          mostrarToast("✅ Cargados " + parsed.length + " registros (desde celular)", "ok");
+          return;
+        }
+      }
+
+      // Si todo falla
+      console.log("❌ Todos los intentos fallaron");
+      setLoading(btn, false);
+      mostrarToast("❌ No se pudieron cargar datos", "error");
+      historialData = [];
+      renderHistorial(historialData);
+    });
+  }).catch(function(err) {
+    console.error("Error en carga fuerza:", err);
+    setLoading(btn, false);
+    mostrarToast("❌ Error: " + err, "error");
   });
 }
 
