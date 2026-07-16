@@ -5,8 +5,8 @@
   "start_url": "./control-rollos-2.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#F8F6F2",
-  "theme_color": "#C9A96E",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
   "orientation": "portrait-primary",
   "icons": [
     {
