@@ -370,6 +370,16 @@ window.addEventListener("online", function(){
   });
 });
 
+// Sincronizar automáticamente cada 10 segundos si hay datos pendientes
+setInterval(function() {
+  try {
+    var cola = JSON.parse(localStorage.getItem("control_rollos_cola") || "[]");
+    if (cola.length > 0 && navigator.onLine) {
+      sincronizarDatos().catch(function() {});
+    }
+  } catch(e) {}
+}, 10000);
+
 // Actualizar Service Worker automáticamente
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.getRegistration().then(function(reg) {
@@ -500,17 +510,33 @@ function sincronizarDatos() {
     var cola = JSON.parse(localStorage.getItem("control_rollos_cola") || "[]");
     if (!cola.length) return Promise.resolve();
 
-    return Promise.all(cola.map(function(item) {
+    // Intentar sincronizar cada item de la cola
+    var promesas = cola.map(function(item, idx) {
       return llamar(item.action, item.data).then(function(res) {
-        if (res.ok) return true;
+        // Marcar como sincronizado si tuvo éxito
+        if (res.ok || !res.offline) {
+          cola.splice(idx, 1);
+          return true;
+        }
+        return false;
+      }).catch(function() {
         return false;
       });
-    })).then(function(resultados) {
-      if (resultados.every(function(r){ return r; })) {
-        localStorage.setItem("control_rollos_cola", JSON.stringify([]));
+    });
+
+    return Promise.all(promesas).then(function() {
+      // Guardar la cola actualizada (sin los items sincronizados)
+      localStorage.setItem("control_rollos_cola", JSON.stringify(cola));
+
+      // Recargar datos desde Google Sheets
+      if (cola.length === 0) {
+        cargarHistorial();
+        cargarInventario();
+        cargarClientes();
       }
     });
   } catch(e) {
+    console.error("Error sincronizando:", e);
     return Promise.resolve();
   }
 }
@@ -625,10 +651,13 @@ function registrarIngreso() {
       // Offline: mostrar mensaje pero permitir continuar
       mostrarToast("✅ Guardado en celular (sin conexión)", "ok");
       limpiarForm("ingreso");
+      // Intentar sincronizar en 2 segundos
+      setTimeout(function() { sincronizarDatos().catch(function(){}); }, 2000);
     } else if (res.ok) {
       mostrarToast("✅ Ingreso registrado", "ok");
       limpiarForm("ingreso");
       cargarClientes();
+      sincronizarDatos().catch(function(){});
     } else {
       mostrarToast("❌ Error: " + res.msg, "error");
     }
@@ -664,9 +693,12 @@ function registrarSalida() {
       // Offline: mostrar mensaje pero permitir continuar
       mostrarToast("✅ Guardado en celular (sin conexión)", "ok");
       limpiarSalida();
+      // Intentar sincronizar en 2 segundos
+      setTimeout(function() { sincronizarDatos().catch(function(){}); }, 2000);
     } else if (res.ok) {
       mostrarToast("✅ Registrado", "ok");
       limpiarSalida();
+      sincronizarDatos().catch(function(){});
     } else {
       mostrarToast("❌ Error: " + res.msg, "error");
     }
@@ -817,11 +849,14 @@ function eliminarRegistro() {
       cerrarModal();
       cargarHistorial();
       cargarInventario();
+      // Intentar sincronizar en 2 segundos
+      setTimeout(function() { sincronizarDatos().catch(function(){}); }, 2000);
     } else if (res.ok) {
       mostrarToast("✅ Eliminado", "ok");
       cerrarModal();
       cargarHistorial();
       cargarInventario();
+      sincronizarDatos().catch(function(){});
     } else {
       mostrarToast("❌ Error: " + res.msg, "error");
     }
@@ -854,11 +889,14 @@ function guardarEdicion() {
       cerrarModal();
       cargarHistorial();
       cargarInventario();
+      // Intentar sincronizar en 2 segundos
+      setTimeout(function() { sincronizarDatos().catch(function(){}); }, 2000);
     } else if (res.ok) {
       mostrarToast("✅ Guardado", "ok");
       cerrarModal();
       cargarHistorial();
       cargarInventario();
+      sincronizarDatos().catch(function(){});
     } else {
       mostrarToast("❌ Error: " + res.msg, "error");
     }
