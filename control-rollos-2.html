@@ -352,7 +352,7 @@
 <div id="page-historial" class="page">
   <div class="section-title">🕘 Últimos Movimientos</div>
   <div class="card" style="padding:12px">
-    <input type="text" id="buscador-historial" placeholder="🔍 Buscar: N° pedido, cliente o usuario..." inputmode="numeric" oninput="filtrarHistorial()" autocomplete="off" style="margin-bottom:8px">
+    <input type="text" id="buscador-historial" placeholder="🔍 Buscar: N° pedido, cliente o usuario..." inputmode="text" oninput="filtrarHistorial()" autocomplete="off" style="margin-bottom:8px">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn-submit gris" id="btn-sincronizar" onclick="sincronizarAhora()" style="margin-top:0"><span>🔄 Sincronizar</span></button>
       <button class="btn-submit gris" id="btn-limpiar" onclick="limpiarDuplicados()" style="margin-top:0"><span>🧹 Limpiar duplicados</span></button>
@@ -1002,11 +1002,16 @@ function registrarIngreso() {
       mostrarToast("✅ Guardado en celular (sin conexión)", "ok");
       limpiarForm("ingreso");
       // Intentar sincronizar en 2 segundos
-      setTimeout(function() { sincronizarDatos().catch(function(){}); }, 2000);
+      setTimeout(function() {
+        sincronizarDatos().then(function() {
+          cargarHistorial();
+        }).catch(function(){});
+      }, 2000);
     } else if (res.ok) {
       mostrarToast("✅ Ingreso registrado", "ok");
       limpiarForm("ingreso");
       cargarClientes();
+      cargarHistorial();
       sincronizarDatos().catch(function(){});
     } else {
       mostrarToast("❌ Error: " + res.msg, "error");
@@ -1055,10 +1060,15 @@ function registrarSalida() {
       mostrarToast("✅ Guardado en celular (sin conexión)", "ok");
       limpiarSalida();
       // Intentar sincronizar en 2 segundos
-      setTimeout(function() { sincronizarDatos().catch(function(){}); }, 2000);
+      setTimeout(function() {
+        sincronizarDatos().then(function() {
+          cargarHistorial();
+        }).catch(function(){});
+      }, 2000);
     } else if (res.ok) {
       mostrarToast("✅ Registrado", "ok");
       limpiarSalida();
+      cargarHistorial();
       sincronizarDatos().catch(function(){});
     } else {
       mostrarToast("❌ Error: " + res.msg, "error");
@@ -1140,19 +1150,35 @@ function renderInventario(rowsAll) {
 
 function cargarHistorial() {
   document.getElementById("mov-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div>';
+  document.getElementById("buscador-historial").value = "";
+
   llamar("obtenerMovimientos").then(function(res){
-    if (res && res.rows) {
-      // Eliminar duplicados por cliente+numCliente+dia
+    console.log("Datos cargados de Google Sheets:", res);
+
+    if (res && res.rows && res.rows.length > 0) {
+      // Eliminar duplicados por cliente+numCliente+dia+tipo+cantidad
       var visto = {};
-      historialData = res.rows.filter(function(r) {
+      var sinDuplicados = [];
+
+      res.rows.forEach(function(r) {
         var clave = r.cliente + "|" + r.numCliente + "|" + r.dia + "|" + r.tipo + "|" + r.cantidad;
-        if (visto[clave]) return false;
-        visto[clave] = true;
-        return true;
+        if (!visto[clave]) {
+          visto[clave] = true;
+          sinDuplicados.push(r);
+        }
       });
+
+      historialData = sinDuplicados;
+      console.log("Historial cargado:", historialData.length, "registros sin duplicados");
     } else {
       historialData = [];
+      console.log("Sin datos en Google Sheets");
     }
+
+    renderHistorial(historialData);
+  }).catch(function(err) {
+    console.error("Error cargando historial:", err);
+    historialData = [];
     renderHistorial(historialData);
   });
 }
