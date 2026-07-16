@@ -353,9 +353,10 @@
   <div class="section-title">🕘 Últimos Movimientos</div>
   <div class="card" style="padding:12px">
     <input type="text" id="buscador-historial" placeholder="🔍 Buscar: N° pedido, cliente o usuario..." inputmode="text" oninput="filtrarHistorial()" autocomplete="off" style="margin-bottom:8px">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <button class="btn-submit gris" id="btn-recargar" onclick="cargarHistorial()" style="margin-top:0"><span>⬇️ Recargar</span></button>
       <button class="btn-submit gris" id="btn-sincronizar" onclick="sincronizarAhora()" style="margin-top:0"><span>🔄 Sincronizar</span></button>
-      <button class="btn-submit gris" id="btn-limpiar" onclick="limpiarDuplicados()" style="margin-top:0"><span>🧹 Limpiar duplicados</span></button>
+      <button class="btn-submit gris" id="btn-limpiar" onclick="limpiarDuplicados()" style="margin-top:0"><span>🧹 Limpiar</span></button>
     </div>
   </div>
   <div class="card">
@@ -1149,23 +1150,30 @@ function renderInventario(rowsAll) {
 }
 
 function cargarHistorial() {
-  document.getElementById("mov-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div>';
+  console.log("=== CARGANDO HISTORIAL ===");
+  document.getElementById("mov-list").innerHTML='<div class="empty"><div class="empty-icon">⏳</div><p>Cargando datos...</p></div>';
   document.getElementById("buscador-historial").value = "";
 
   llamar("obtenerMovimientos").then(function(res){
-    console.log("Datos cargados de Google Sheets:", res);
+    console.log("Respuesta de Google Sheets:", res);
+    console.log("¿Hay datos?", res ? "sí" : "no");
+    console.log("¿Hay rows?", res && res.rows ? "sí" : "no");
+    console.log("¿Cuántos rows?", res && res.rows ? res.rows.length : "N/A");
 
     if (res && res.rows && res.rows.length > 0) {
       historialData = res.rows;
-      console.log("Historial cargado:", historialData.length, "registros");
+      console.log("✅ Historial cargado:", historialData.length, "registros");
+      mostrarToast("✅ " + historialData.length + " registros cargados", "ok");
     } else {
       historialData = [];
-      console.log("Sin datos en Google Sheets");
+      console.log("⚠️ Sin datos en Google Sheets o respuesta vacía");
+      mostrarToast("⚠️ Sin datos en Google Sheets", "warn");
     }
 
     renderHistorial(historialData);
   }).catch(function(err) {
-    console.error("Error cargando historial:", err);
+    console.error("❌ Error cargando historial:", err);
+    mostrarToast("❌ Error: " + err, "error");
     historialData = [];
     renderHistorial(historialData);
   });
