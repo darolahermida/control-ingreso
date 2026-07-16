@@ -1112,16 +1112,18 @@ function calcInventario(movs) {
   return Object.keys(map).map(function(k){ map[k].stock = Math.max(0, map[k].stock); return map[k]; });
 }
 
-// Refresca el inventario global. Usa el backend obtenerInventario (que recorre toda la
-// planilla) si está disponible; si no responde (la función no está en el deployment actual
-// del GAS), cae al cálculo desde los últimos movimientos para no quedar sin stock.
+// Refresca el inventario global desde los movimientos
 function refrescarInventario() {
-  return llamar("obtenerInventario").then(function(res){
-    if (res && res.ok && Array.isArray(res.rows)) { inventario = res.rows; return inventario; }
-    return llamar("obtenerMovimientos").then(function(m){
-      inventario = calcInventario(m && m.rows ? m.rows : []);
+  return llamar("obtenerMovimientos").then(function(m){
+    if (m && m.ok && m.rows) {
+      inventario = calcInventario(m.rows);
       return inventario;
-    });
+    }
+    inventario = [];
+    return inventario;
+  }).catch(function(){
+    inventario = [];
+    return inventario;
   });
 }
 
