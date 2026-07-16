@@ -352,7 +352,7 @@
 <div id="page-historial" class="page">
   <div class="section-title">🕘 Últimos Movimientos</div>
   <div class="card" style="padding:12px">
-    <input type="text" id="buscador-historial" placeholder="🔍 Buscar por N° de pedido o cliente..." inputmode="numeric" oninput="filtrarHistorial()" autocomplete="off" style="margin-bottom:8px">
+    <input type="text" id="buscador-historial" placeholder="🔍 Buscar: N° pedido, cliente o usuario..." inputmode="numeric" oninput="filtrarHistorial()" autocomplete="off" style="margin-bottom:8px">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn-submit gris" id="btn-sincronizar" onclick="sincronizarAhora()" style="margin-top:0"><span>🔄 Sincronizar</span></button>
       <button class="btn-submit gris" id="btn-limpiar" onclick="limpiarDuplicados()" style="margin-top:0"><span>🧹 Limpiar duplicados</span></button>
@@ -977,7 +977,16 @@ function registrarIngreso() {
   if (!nombre) { mostrarToast("⚠️ Ingresá el nombre del cliente","error"); return; }
   if (!cant||parseInt(cant)<=0) { mostrarToast("⚠️ Ingresá la cantidad","error"); return; }
 
-  var datosIngreso = {dia:dia, numCliente:num, cliente:nombre, cantidad:cant};
+  var ahora = new Date();
+  var datosIngreso = {
+    dia: dia,
+    numCliente: num,
+    cliente: nombre,
+    cantidad: cant,
+    usuario: usuarioActual,
+    fecha: ahora.toLocaleDateString("es-AR"),
+    hora: ahora.toLocaleTimeString("es-AR")
+  };
 
   // Guardar localmente primero
   guardarLocalmente("registrarIngreso", datosIngreso);
@@ -1016,7 +1025,18 @@ function registrarSalida() {
   if (!nombre) { mostrarToast("⚠️ Pedido no encontrado","error"); return; }
   if (!cant||parseInt(cant)<=0) { mostrarToast("⚠️ Ingresá la cantidad","error"); return; }
 
-  var datosSalida = {dia:dia, numCliente:num, cliente:nombre, cantidad:cant, tipo:tipoSalida.toUpperCase(), transporte:tipoSalida==="envio"?transporteSeleccionado:""};
+  var ahora = new Date();
+  var datosSalida = {
+    dia: dia,
+    numCliente: num,
+    cliente: nombre,
+    cantidad: cant,
+    tipo: tipoSalida.toUpperCase(),
+    transporte: tipoSalida==="envio"?transporteSeleccionado:"",
+    usuario: usuarioActual,
+    fecha: ahora.toLocaleDateString("es-AR"),
+    hora: ahora.toLocaleTimeString("es-AR")
+  };
 
   // Guardar localmente primero
   guardarLocalmente("registrarSalida", datosSalida);
@@ -1141,8 +1161,9 @@ function filtrarHistorial() {
   var val = document.getElementById("buscador-historial").value.trim().toLowerCase();
   if (!val) { renderHistorial(historialData); return; }
   var filtrado = historialData.filter(function(r){
-    return r.numCliente.toString().includes(val) || 
-           r.cliente.toLowerCase().includes(val);
+    return r.numCliente.toString().includes(val) ||
+           r.cliente.toLowerCase().includes(val) ||
+           (r.usuario && r.usuario.toLowerCase().includes(val));
   });
   renderHistorial(filtrado);
 }
@@ -1202,9 +1223,13 @@ function eliminarRegistro() {
   });
 
   // Guardar en localStorage
+  var ahora = new Date();
   guardarLocalmente("eliminarMovimiento", {
     cliente: cliente,
-    numCliente: numCliente
+    numCliente: numCliente,
+    usuario: usuarioActual,
+    fecha: ahora.toLocaleDateString("es-AR"),
+    hora: ahora.toLocaleTimeString("es-AR")
   });
 
   setLoading(btn, false);
@@ -1264,12 +1289,16 @@ function guardarEdicion() {
   }
 
   // Guardar en localStorage
+  var ahora = new Date();
   guardarLocalmente("editarMovimiento", {
     numCliente: numCliente,
     cliente: cliente,
     cantidad: parseInt(cantidad),
     tipo: tipo,
-    dia: dia
+    dia: dia,
+    usuario: usuarioActual,
+    fecha: ahora.toLocaleDateString("es-AR"),
+    hora: ahora.toLocaleTimeString("es-AR")
   });
 
   setLoading(btn,false);
