@@ -1,5 +1,5 @@
 // Service Worker - Control de Rollos PWA
-const CACHE_NAME = 'control-rollos-v1';
+const CACHE_NAME = 'control-rollos-v2';
 const URLS_TO_CACHE = [
   '.',
   'control-rollos-2.html',
