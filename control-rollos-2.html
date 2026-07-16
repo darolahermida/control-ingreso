@@ -359,6 +359,14 @@ setDiaActual();
 cargarClientes();
 setInterval(setDiaActual, 60000);
 
+// Sincronizar datos offline cuando vuelve la conexión
+window.addEventListener("online", function(){
+  mostrarToast("🌐 Conexión restaurada - sincronizando datos...", "ok");
+  sincronizarDatos().then(function(){
+    mostrarToast("✅ Datos sincronizados", "ok");
+  });
+});
+
 // ── VOZ ──
 var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 var reconActivo = null;
@@ -428,7 +436,47 @@ function selTransporte(el, nombre) {
 function llamar(action, params) {
   var url = GAS_URL + "?action=" + encodeURIComponent(action);
   if (params) url += "&data=" + encodeURIComponent(JSON.stringify(params));
-  return fetch(url).then(function(r){ return r.json(); }).catch(function(){ return {ok:false,msg:"Error de red"}; });
+
+  return fetch(url, {method:"GET", mode:"cors"}).then(function(r){
+    return r.json();
+  }).catch(function(err){
+    // Si falla la red, devolver error pero no bloquear
+    return {ok:false, msg:"Sin conexión (offline)", offline:true};
+  });
+}
+
+function guardarLocalmente(action, params) {
+  var clave = "control_rollos_" + action + "_" + Date.now();
+  var datos = {timestamp: new Date().toISOString(), action: action, data: params};
+
+  try {
+    var cola = JSON.parse(localStorage.getItem("control_rollos_cola") || "[]");
+    cola.push(datos);
+    localStorage.setItem("control_rollos_cola", JSON.stringify(cola));
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+function sincronizarDatos() {
+  try {
+    var cola = JSON.parse(localStorage.getItem("control_rollos_cola") || "[]");
+    if (!cola.length) return Promise.resolve();
+
+    return Promise.all(cola.map(function(item) {
+      return llamar(item.action, item.data).then(function(res) {
+        if (res.ok) return true;
+        return false;
+      });
+    })).then(function(resultados) {
+      if (resultados.every(function(r){ return r; })) {
+        localStorage.setItem("control_rollos_cola", JSON.stringify([]));
+      }
+    });
+  } catch(e) {
+    return Promise.resolve();
+  }
 }
 
 function cargarClientes() {
@@ -525,11 +573,29 @@ function registrarIngreso() {
   if (!num) { mostrarToast("⚠️ Ingresá el N° de pedido","error"); return; }
   if (!nombre) { mostrarToast("⚠️ Ingresá el nombre del cliente","error"); return; }
   if (!cant||parseInt(cant)<=0) { mostrarToast("⚠️ Ingresá la cantidad","error"); return; }
-  var btn = document.getElementById("btn-ingreso"); setLoading(btn,true,"dark");
-  llamar("registrarIngreso",{dia:dia,numCliente:num,cliente:nombre,cantidad:cant}).then(function(res){
+
+  var datosIngreso = {dia:dia, numCliente:num, cliente:nombre, cantidad:cant};
+
+  // Guardar localmente primero
+  guardarLocalmente("registrarIngreso", datosIngreso);
+
+  var btn = document.getElementById("btn-ingreso");
+  setLoading(btn,true,"dark");
+
+  // Intentar enviar a Google Sheets
+  llamar("registrarIngreso", datosIngreso).then(function(res){
     setLoading(btn,false);
-    mostrarToast(res.msg||(res.ok?"✅ Ingreso registrado":"❌ Error"),res.ok?"ok":"error");
-    if(res.ok){ limpiarForm("ingreso"); cargarClientes(); }
+    if (res.offline) {
+      // Offline: mostrar mensaje pero permitir continuar
+      mostrarToast("✅ Guardado en celular (sin conexión)", "ok");
+      limpiarForm("ingreso");
+    } else if (res.ok) {
+      mostrarToast("✅ Ingreso registrado", "ok");
+      limpiarForm("ingreso");
+      cargarClientes();
+    } else {
+      mostrarToast("❌ Error: " + res.msg, "error");
+    }
   });
 }
 
@@ -543,13 +609,31 @@ function registrarSalida() {
   if (!num) { mostrarToast("⚠️ Ingresá el N° de pedido","error"); return; }
   if (!nombre) { mostrarToast("⚠️ Pedido no encontrado","error"); return; }
   if (!cant||parseInt(cant)<=0) { mostrarToast("⚠️ Ingresá la cantidad","error"); return; }
-  var btn = document.getElementById("btn-salida"); setLoading(btn,true,"white");
-  llamar("registrarSalida",{dia:dia,numCliente:num,cliente:nombre,cantidad:cant,tipo:tipoSalida.toUpperCase(),transporte:tipoSalida==="envio"?transporteSeleccionado:""}).then(function(res){
+
+  var datosSalida = {dia:dia, numCliente:num, cliente:nombre, cantidad:cant, tipo:tipoSalida.toUpperCase(), transporte:tipoSalida==="envio"?transporteSeleccionado:""};
+
+  // Guardar localmente primero
+  guardarLocalmente("registrarSalida", datosSalida);
+
+  var btn = document.getElementById("btn-salida");
+  setLoading(btn,true,"white");
+
+  // Intentar enviar a Google Sheets
+  llamar("registrarSalida", datosSalida).then(function(res){
     setLoading(btn,false);
     if(tipoSalida==="envio") btn.innerHTML="<span>Confirmar Envío 🚚</span>";
     else btn.innerHTML="<span>Confirmar Desarme 🔧</span>";
-    mostrarToast(res.msg||(res.ok?"✅ Registrado":"❌ Error"),res.ok?"ok":"error");
-    if(res.ok){ limpiarSalida(); }
+
+    if (res.offline) {
+      // Offline: mostrar mensaje pero permitir continuar
+      mostrarToast("✅ Guardado en celular (sin conexión)", "ok");
+      limpiarSalida();
+    } else if (res.ok) {
+      mostrarToast("✅ Registrado", "ok");
+      limpiarSalida();
+    } else {
+      mostrarToast("❌ Error: " + res.msg, "error");
+    }
   });
 }
 
