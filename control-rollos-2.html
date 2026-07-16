@@ -281,7 +281,10 @@
   <div class="section-title">🕘 Últimos Movimientos</div>
   <div class="card" style="padding:12px">
     <input type="text" id="buscador-historial" placeholder="🔍 Buscar por N° de pedido o cliente..." inputmode="numeric" oninput="filtrarHistorial()" autocomplete="off" style="margin-bottom:8px">
-    <button class="btn-submit gris" id="btn-sincronizar" onclick="sincronizarAhora()" style="margin-top:0"><span>🔄 Sincronizar ahora</span></button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn-submit gris" id="btn-sincronizar" onclick="sincronizarAhora()" style="margin-top:0"><span>🔄 Sincronizar</span></button>
+      <button class="btn-submit gris" id="btn-limpiar" onclick="limpiarDuplicados()" style="margin-top:0"><span>🧹 Limpiar duplicados</span></button>
+    </div>
   </div>
   <div class="card">
     <ul class="mov-list" id="mov-list"><div class="empty"><div class="empty-icon">⏳</div><p>Cargando...</p></div></ul>
@@ -600,6 +603,87 @@ function sincronizarAhora() {
   }).catch(function(err) {
     setLoading(btn, false);
     mostrarToast("❌ Error al sincronizar: " + err, "error");
+  });
+}
+
+function limpiarDuplicados() {
+  var btn = document.getElementById("btn-limpiar");
+  if (!btn) return;
+
+  setLoading(btn, true, "dark");
+  mostrarToast("🧹 Identificando duplicados...", "warn");
+
+  // Cargar datos frescos de Google Sheets
+  llamar("obtenerMovimientos").then(function(res) {
+    if (!res || !res.rows) {
+      setLoading(btn, false);
+      mostrarToast("⚠️ No se pudieron cargar los datos", "warn");
+      return;
+    }
+
+    var todos = res.rows;
+    var duplicados = [];
+    var vistos = {};
+
+    // Identificar duplicados
+    todos.forEach(function(r, idx) {
+      var clave = r.cliente + "|" + r.numCliente + "|" + r.dia + "|" + r.tipo + "|" + r.cantidad;
+      if (vistos[clave]) {
+        // Este es un duplicado
+        duplicados.push({
+          idx: idx,
+          cliente: r.cliente,
+          numCliente: r.numCliente,
+          tipo: r.tipo,
+          cantidad: r.cantidad
+        });
+      } else {
+        vistos[clave] = true;
+      }
+    });
+
+    console.log("Duplicados encontrados:", duplicados);
+
+    if (!duplicados.length) {
+      setLoading(btn, false);
+      mostrarToast("✅ No hay duplicados", "ok");
+      return;
+    }
+
+    // Eliminar duplicados uno por uno
+    var promesa = Promise.resolve();
+    duplicados.forEach(function(dup) {
+      promesa = promesa.then(function() {
+        console.log("Eliminando duplicado:", dup.cliente);
+        return new Promise(function(resolve) {
+          guardarLocalmente("eliminarMovimiento", {
+            cliente: dup.cliente,
+            numCliente: dup.numCliente
+          });
+          resolve();
+        });
+      });
+    });
+
+    promesa.then(function() {
+      // Sincronizar eliminaciones
+      return sincronizarDatos();
+    }).then(function() {
+      // Recargar datos frescos
+      return llamar("obtenerMovimientos").then(function(res) {
+        if (res && res.rows) {
+          historialData = res.rows;
+          renderHistorial(historialData);
+        }
+      });
+    }).then(function() {
+      setLoading(btn, false);
+      mostrarToast("✅ Se eliminaron " + duplicados.length + " duplicados", "ok");
+    }).catch(function(err) {
+      setLoading(btn, false);
+      mostrarToast("⚠️ Error al limpiar duplicados", "error");
+      console.error(err);
+    });
   });
 }
 
