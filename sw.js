@@ -40,13 +40,37 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Estrategia: Cache first, fallback a network
+// Estrategia: Network first para HTML, cache first para otros
 self.addEventListener('fetch', event => {
   // Solo cachear GET requests
   if (event.request.method !== 'GET') {
     return;
   }
 
+  // Para archivos HTML: siempre intenta network primero
+  if (event.request.destination === 'document' || event.request.url.endsWith('.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Guardar la versión más reciente en caché
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Si falla la red, usar caché
+          return caches.match(event.request)
+            .then(response => response || new Response('Offline - intenta más tarde', {status: 503}));
+        })
+    );
+    return;
+  }
+
+  // Para otros archivos (CSS, JS, imágenes): cache first
   event.respondWith(
     caches.match(event.request).then(response => {
       // Si está en caché, devolverlo
