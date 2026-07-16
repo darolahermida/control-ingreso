@@ -885,21 +885,29 @@ function limpiarDuplicados() {
 }
 
 function cargarClientes() {
+  console.log("Cargando clientes...");
   llamar("obtenerMovimientos").then(function(res) {
-    if (res && res.ok && res.rows) {
+    console.log("Respuesta obtenerMovimientos:", res);
+    if (res && res.ok && res.rows && res.rows.length > 0) {
       var clientesMap = {};
       res.rows.forEach(function(row) {
-        if (row.numCliente && row.cliente) {
-          clientesMap[row.numCliente] = row.cliente;
+        var num = String(row.numCliente || "").trim();
+        var nom = String(row.cliente || "").trim();
+        if (num && nom) {
+          clientesMap[num] = nom;
         }
       });
       clientes = Object.keys(clientesMap).map(function(num) {
         return { num: num, nombre: clientesMap[num] };
       });
-      console.log("✅ Cargados " + clientes.length + " clientes");
+      console.log("✅ Clientes cargados:", clientes.length);
+    } else {
+      console.warn("Sin datos en obtenerMovimientos");
+      clientes = [];
     }
   }).catch(function(err) {
-    console.error("Error cargando clientes:", err);
+    console.error("❌ Error cargando clientes:", err);
+    clientes = [];
   });
 }
 
