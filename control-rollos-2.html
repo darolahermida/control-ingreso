@@ -8,7 +8,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Control Rollos">
   <title>Control de Rollos</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json?v=3">
+  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="expires" content="0">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="logo-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="logo-512.png">
@@ -1046,9 +1049,13 @@ function cerrarScanner() {
 // Registrar Service Worker para PWA (offline + installable)
 if ('serviceWorker' in navigator) {
   // Detectar si estamos en GitHub Pages o servidor local
-  var swPath = window.location.pathname.includes('/control-ingreso/') ? '/control-ingreso/sw.js' : '/sw.js';
+  var swPath = window.location.pathname.includes('/control-ingreso/') ? '/control-ingreso/sw.js?v=3' : '/sw.js?v=3';
   navigator.serviceWorker.register(swPath).then(function(reg) {
     console.log('✅ Service Worker registrado:', swPath);
+    // Verificar actualizaciones cada 5 minutos
+    setInterval(function() {
+      reg.update().catch(function() {});
+    }, 300000);
   }).catch(function(err) {
     console.log('⚠️ Service Worker error:', err);
   });
