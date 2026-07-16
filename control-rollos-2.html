@@ -148,12 +148,84 @@
     .scan-success-flash{position:fixed;inset:0;background:rgba(46,160,67,.4);z-index:1000;display:none;animation:flash .4s ease;pointer-events:none}
     @keyframes flash{0%{opacity:1}100%{opacity:0}}
     .btn-scan{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:7px;color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;padding:0 14px;height:44px;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0}
+
+    /* LOGIN */
+    .login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px}
+    .login-screen.hidden{display:none}
+    .login-container{background:#fff;border-radius:16px;padding:40px 24px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,.15)}
+    .login-header{text-align:center;margin-bottom:28px}
+    .login-logo{font-size:3rem;margin-bottom:12px}
+    .login-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.6rem;color:var(--text);margin-bottom:4px}
+    .login-subtitle{font-size:.85rem;color:var(--muted)}
+    .login-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:24px}
+    .login-tab{flex:1;padding:12px;text-align:center;border:none;background:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;transition:all .2s}
+    .login-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .login-form{display:none}
+    .login-form.active{display:block}
+    .login-field{margin-bottom:16px}
+    .login-field:last-child{margin-bottom:0}
+    .login-label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em}
+    .login-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:1rem;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s}
+    .login-input:focus{border-color:var(--accent)}
+    .login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;cursor:pointer;margin-top:20px;text-transform:uppercase;letter-spacing:.05em;transition:opacity .2s}
+    .login-btn:active{opacity:.85}
+    .login-error{color:var(--red);font-size:.8rem;margin-top:8px;display:none}
+    .login-error.show{display:block}
   </style>
 </head>
 <body>
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-logo">🔒</div>
+      <h2 class="login-title">Control Rollos</h2>
+      <p class="login-subtitle">La Hermida</p>
+    </div>
+
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="cambiarTabLogin('ingreso')">Ingresar</button>
+      <button class="login-tab" onclick="cambiarTabLogin('registro')">Registrarse</button>
+    </div>
+
+    <!-- FORMULARIO INGRESO -->
+    <form class="login-form active" id="form-ingreso" onsubmit="ingresarUsuario(event)">
+      <div class="login-field">
+        <label class="login-label">Usuario</label>
+        <input type="text" class="login-input" id="login-usuario" placeholder="Tu usuario" required>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Contraseña</label>
+        <input type="password" class="login-input" id="login-password" placeholder="Tu contraseña" required>
+      </div>
+      <div class="login-error" id="login-error-ingreso"></div>
+      <button type="submit" class="login-btn">Ingresar</button>
+    </form>
+
+    <!-- FORMULARIO REGISTRO -->
+    <form class="login-form" id="form-registro" onsubmit="registrarUsuario(event)">
+      <div class="login-field">
+        <label class="login-label">Usuario</label>
+        <input type="text" class="login-input" id="registro-usuario" placeholder="Elige un usuario" required>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Contraseña</label>
+        <input type="password" class="login-input" id="registro-password" placeholder="Elige una contraseña" required>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Confirmar contraseña</label>
+        <input type="password" class="login-input" id="registro-password2" placeholder="Confirma la contraseña" required>
+      </div>
+      <div class="login-error" id="login-error-registro"></div>
+      <button type="submit" class="login-btn">Crear Cuenta</button>
+    </form>
+  </div>
+</div>
+
 <header>
   <div class="logo-icon">📦</div>
   <h1>Control de Rollos<span id="fechaHeader">Cargando...</span></h1>
+  <button onclick="cerrarSesion()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);padding:8px" title="Cerrar sesión">🚪</button>
 </header>
 <div class="tabs">
   <button class="tab active" onclick="mostrarPagina('ingreso',this)">➕ Ingreso</button>
@@ -361,10 +433,133 @@
 var GAS_URL = "https://script.google.com/macros/s/AKfycbzcM5DHgiy9ErkuzyEDg0tiPTiCQZ1UvYx9_1BGuH-SG8Siuo8ICrZIW5rv3vGbiv_EHw/exec";
 var clientes = [], inventario = [], tipoSalida = null, transporteSeleccionado = null;
 var historialData = [];
+var usuarioActual = null;
 
-setDiaActual();
-cargarClientes();
-setInterval(setDiaActual, 60000);
+// Verificar si el usuario ya está logueado
+function verificarLogin() {
+  var usuarioLogueado = localStorage.getItem("control_rollos_usuario");
+  if (usuarioLogueado) {
+    usuarioActual = usuarioLogueado;
+    ocultarLoginScreen();
+    setDiaActual();
+    cargarClientes();
+    setInterval(setDiaActual, 60000);
+  } else {
+    mostrarLoginScreen();
+  }
+}
+
+function mostrarLoginScreen() {
+  document.getElementById("login-screen").classList.remove("hidden");
+}
+
+function ocultarLoginScreen() {
+  document.getElementById("login-screen").classList.add("hidden");
+}
+
+function cambiarTabLogin(tab) {
+  document.querySelectorAll(".login-tab").forEach(function(t) { t.classList.remove("active"); });
+  document.querySelectorAll(".login-form").forEach(function(f) { f.classList.remove("active"); });
+
+  event.target.classList.add("active");
+  document.getElementById("form-" + tab).classList.add("active");
+  document.getElementById("login-error-" + tab).classList.remove("show");
+}
+
+function ingresarUsuario(event) {
+  event.preventDefault();
+  var usuario = document.getElementById("login-usuario").value.trim();
+  var password = document.getElementById("login-password").value;
+  var errorEl = document.getElementById("login-error-ingreso");
+
+  if (!usuario || !password) {
+    errorEl.textContent = "Completá todos los campos";
+    errorEl.classList.add("show");
+    return;
+  }
+
+  try {
+    var usuarios = JSON.parse(localStorage.getItem("control_rollos_usuarios") || "{}");
+    if (usuarios[usuario] && usuarios[usuario] === password) {
+      localStorage.setItem("control_rollos_usuario", usuario);
+      usuarioActual = usuario;
+      ocultarLoginScreen();
+      setDiaActual();
+      cargarClientes();
+      setInterval(setDiaActual, 60000);
+      mostrarToast("✅ Bienvenido " + usuario, "ok");
+    } else {
+      errorEl.textContent = "Usuario o contraseña incorrectos";
+      errorEl.classList.add("show");
+    }
+  } catch(e) {
+    errorEl.textContent = "Error al ingresar";
+    errorEl.classList.add("show");
+  }
+}
+
+function registrarUsuario(event) {
+  event.preventDefault();
+  var usuario = document.getElementById("registro-usuario").value.trim();
+  var password = document.getElementById("registro-password").value;
+  var password2 = document.getElementById("registro-password2").value;
+  var errorEl = document.getElementById("login-error-registro");
+
+  if (!usuario || !password || !password2) {
+    errorEl.textContent = "Completá todos los campos";
+    errorEl.classList.add("show");
+    return;
+  }
+
+  if (password !== password2) {
+    errorEl.textContent = "Las contraseñas no coinciden";
+    errorEl.classList.add("show");
+    return;
+  }
+
+  if (password.length < 4) {
+    errorEl.textContent = "La contraseña debe tener al menos 4 caracteres";
+    errorEl.classList.add("show");
+    return;
+  }
+
+  try {
+    var usuarios = JSON.parse(localStorage.getItem("control_rollos_usuarios") || "{}");
+    if (usuarios[usuario]) {
+      errorEl.textContent = "Este usuario ya existe";
+      errorEl.classList.add("show");
+      return;
+    }
+
+    usuarios[usuario] = password;
+    localStorage.setItem("control_rollos_usuarios", JSON.stringify(usuarios));
+    localStorage.setItem("control_rollos_usuario", usuario);
+    usuarioActual = usuario;
+
+    // Limpiar formularios
+    document.getElementById("registro-usuario").value = "";
+    document.getElementById("registro-password").value = "";
+    document.getElementById("registro-password2").value = "";
+
+    ocultarLoginScreen();
+    setDiaActual();
+    cargarClientes();
+    setInterval(setDiaActual, 60000);
+    mostrarToast("✅ Cuenta creada! Bienvenido " + usuario, "ok");
+  } catch(e) {
+    errorEl.textContent = "Error al crear la cuenta";
+    errorEl.classList.add("show");
+  }
+}
+
+function cerrarSesion() {
+  localStorage.removeItem("control_rollos_usuario");
+  usuarioActual = null;
+  location.reload();
+}
+
+// Verificar login al cargar
+verificarLogin();
 
 // Sincronizar datos offline cuando vuelve la conexión
 window.addEventListener("online", function(){
