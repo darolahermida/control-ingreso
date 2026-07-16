@@ -1156,20 +1156,8 @@ function cargarHistorial() {
     console.log("Datos cargados de Google Sheets:", res);
 
     if (res && res.rows && res.rows.length > 0) {
-      // Eliminar duplicados por cliente+numCliente+dia+tipo+cantidad
-      var visto = {};
-      var sinDuplicados = [];
-
-      res.rows.forEach(function(r) {
-        var clave = r.cliente + "|" + r.numCliente + "|" + r.dia + "|" + r.tipo + "|" + r.cantidad;
-        if (!visto[clave]) {
-          visto[clave] = true;
-          sinDuplicados.push(r);
-        }
-      });
-
-      historialData = sinDuplicados;
-      console.log("Historial cargado:", historialData.length, "registros sin duplicados");
+      historialData = res.rows;
+      console.log("Historial cargado:", historialData.length, "registros");
     } else {
       historialData = [];
       console.log("Sin datos en Google Sheets");
@@ -1196,7 +1184,14 @@ function filtrarHistorial() {
 
 function renderHistorial(rows) {
   var list=document.getElementById("mov-list");
-  if (!rows||!rows.length) { list.innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>Sin movimientos</p></div>'; return; }
+  console.log("renderHistorial llamado con", rows ? rows.length : 0, "registros");
+
+  if (!rows||!rows.length) {
+    console.log("Sin registros para mostrar");
+    list.innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>Sin movimientos</p></div>';
+    return;
+  }
+
   list.innerHTML=rows.map(function(r,idx){
     var esIng=r.tipo==="INGRESO", esEnv=r.tipo==="ENVIO";
     var cls=esIng?"ing":esEnv?"env":"dsm";
@@ -1205,11 +1200,12 @@ function renderHistorial(rows) {
     var label=esIng?"INGRESO":esEnv?"ENVÍO":"DESARME";
     var transp = r.transporte ? " · "+r.transporte : "";
     var hora = r.hora ? " " + r.hora : "";
+    var usuario = r.usuario ? " por "+r.usuario : "";
     // Buscar el índice real en historialData
     var idxReal = historialData.findIndex(function(item) {
       return item.cliente === r.cliente && item.numCliente === r.numCliente && item.cantidad === r.cantidad && item.dia === r.dia;
     });
-    return '<li class="mov-item"><div class="mov-ico '+cls+'">'+ico+'</div><div class="mov-datos"><div class="mov-cliente">'+r.cliente+'</div><div class="mov-detalle">'+label+transp+' · '+r.dia+' · '+r.fecha+hora+' · N° '+r.numCliente+'</div><button class="btn-edit-mov" onclick="abrirEditar('+idxReal+')">✏️ Editar</button></div><div class="mov-cant '+cls+'">'+sig+r.cantidad+'</div></li>';
+    return '<li class="mov-item"><div class="mov-ico '+cls+'">'+ico+'</div><div class="mov-datos"><div class="mov-cliente">'+r.cliente+'</div><div class="mov-detalle">'+label+transp+' · '+r.dia+' · '+r.fecha+hora+usuario+' · N° '+r.numCliente+'</div><button class="btn-edit-mov" onclick="abrirEditar('+idxReal+')">✏️ Editar</button></div><div class="mov-cant '+cls+'">'+sig+r.cantidad+'</div></li>';
   }).join("");
 }
 
