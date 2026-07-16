@@ -994,10 +994,16 @@ function getNombre(form) {
 }
 
 function registrarIngreso() {
+  if (!usuarioActual) {
+    mostrarToast("⚠️ Debes estar logueado", "error");
+    return;
+  }
+
   var num = document.getElementById("numcli-ingreso").value.trim();
   var nombre = getNombre("ingreso");
   var cant = document.getElementById("cant-ingreso").value;
-  var dia = document.getElementById("dia-ingreso").value;
+  var dia = document.getElementById("dia-ingreso").value || "";
+
   if (!num) { mostrarToast("⚠️ Ingresá el N° de pedido","error"); return; }
   if (!nombre) { mostrarToast("⚠️ Ingresá el nombre del cliente","error"); return; }
   if (!cant||parseInt(cant)<=0) { mostrarToast("⚠️ Ingresá la cantidad","error"); return; }
@@ -1008,10 +1014,12 @@ function registrarIngreso() {
     numCliente: num,
     cliente: nombre,
     cantidad: cant,
-    usuario: usuarioActual,
+    usuario: usuarioActual || "sin-usuario",
     fecha: ahora.toLocaleDateString("es-AR"),
     hora: ahora.toLocaleTimeString("es-AR")
   };
+
+  console.log("Registrando ingreso:", datosIngreso);
 
   // Guardar localmente primero
   guardarLocalmente("registrarIngreso", datosIngreso);
@@ -1022,7 +1030,9 @@ function registrarIngreso() {
   // Intentar enviar a Google Sheets
   llamar("registrarIngreso", datosIngreso).then(function(res){
     setLoading(btn,false);
-    if (res.offline) {
+    console.log("Respuesta registrarIngreso:", res);
+
+    if (res && res.offline) {
       // Offline: mostrar mensaje pero permitir continuar
       mostrarToast("✅ Guardado en celular (sin conexión)", "ok");
       limpiarForm("ingreso");
@@ -1032,15 +1042,19 @@ function registrarIngreso() {
           cargarHistorial();
         }).catch(function(){});
       }, 2000);
-    } else if (res.ok) {
+    } else if (res && res.ok) {
       mostrarToast("✅ Ingreso registrado", "ok");
       limpiarForm("ingreso");
       cargarClientes();
       cargarHistorial();
       sincronizarDatos().catch(function(){});
     } else {
-      mostrarToast("❌ Error: " + res.msg, "error");
+      mostrarToast("❌ Error: " + (res ? res.msg || res.error : "desconocido"), "error");
     }
+  }).catch(function(err){
+    setLoading(btn,false);
+    console.error("Error en registrarIngreso:", err);
+    mostrarToast("❌ Error: " + err, "error");
   });
 }
 
