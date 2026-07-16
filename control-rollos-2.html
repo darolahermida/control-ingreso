@@ -895,38 +895,36 @@ function cerrarModal() {
 function eliminarRegistro() {
   var fila = document.getElementById("edit-fila").value;
   var cliente = document.getElementById("edit-cliente").value;
-  if (!confirm) { mostrarToast("⚠️ No se pudo confirmar","error"); return; }
+
+  if (!confirm("¿Estás seguro de que querés eliminar este registro?")) {
+    return;
+  }
 
   var datosEliminar = { fila: fila, cliente: cliente };
 
-  // Guardar localmente primero
+  // Guardar en localStorage para sincronización
   guardarLocalmente("eliminarMovimiento", datosEliminar);
 
   var btn = document.querySelector('[onclick="eliminarRegistro()"]');
   setLoading(btn, true, "white");
 
-  llamar("eliminarMovimiento", datosEliminar).then(function(res){
-    setLoading(btn, false);
-    btn.innerHTML = "<span>🗑️ Eliminar Registro</span>";
+  // Eliminar localmente de inmediato
+  var idx = parseInt(fila);
+  if (historialData[idx]) {
+    historialData.splice(idx, 1);
+  }
 
-    if (res.offline) {
-      // Offline: mostrar mensaje pero permitir continuar
-      mostrarToast("✅ Registro marcado para eliminar (sin conexión)", "ok");
-      cerrarModal();
-      cargarHistorial();
-      cargarInventario();
-      // Intentar sincronizar en 2 segundos
-      setTimeout(function() { sincronizarDatos().catch(function(){}); }, 2000);
-    } else if (res.ok) {
-      mostrarToast("✅ Eliminado", "ok");
-      cerrarModal();
-      cargarHistorial();
-      cargarInventario();
-      sincronizarDatos().catch(function(){});
-    } else {
-      mostrarToast("❌ Error: " + res.msg, "error");
-    }
-  });
+  // Mostrar cambio inmediatamente
+  mostrarToast("✅ Registro eliminado", "ok");
+  setLoading(btn, false);
+  cerrarModal();
+  renderHistorial(historialData);
+  cargarInventario();
+
+  // Intentar sincronizar con Google Sheets
+  setTimeout(function() {
+    sincronizarDatos().catch(function(){});
+  }, 1000);
 }
 
 function guardarEdicion() {
@@ -934,39 +932,39 @@ function guardarEdicion() {
     fila: document.getElementById("edit-fila").value,
     numCliente: document.getElementById("edit-num").value.trim(),
     cliente: document.getElementById("edit-cliente").value.trim(),
-    cantidad: document.getElementById("edit-cant").value,
+    cantidad: parseInt(document.getElementById("edit-cant").value),
     tipo: document.getElementById("edit-tipo").value,
     dia: document.getElementById("edit-dia").value
   };
   if (!datos.numCliente||!datos.cliente||!datos.cantidad) { mostrarToast("⚠️ Completá todos los campos","error"); return; }
 
-  // Guardar localmente primero
-  guardarLocalmente("editarMovimiento", datos);
-
   var btn = document.getElementById("btn-guardar-edit");
   setLoading(btn,true,"dark");
 
-  // Intentar enviar a Google Sheets
-  llamar("editarMovimiento", datos).then(function(res){
-    setLoading(btn,false);
-    if (res.offline) {
-      // Offline: mostrar mensaje pero permitir continuar
-      mostrarToast("✅ Cambios guardados en celular (sin conexión)", "ok");
-      cerrarModal();
-      cargarHistorial();
-      cargarInventario();
-      // Intentar sincronizar en 2 segundos
-      setTimeout(function() { sincronizarDatos().catch(function(){}); }, 2000);
-    } else if (res.ok) {
-      mostrarToast("✅ Guardado", "ok");
-      cerrarModal();
-      cargarHistorial();
-      cargarInventario();
-      sincronizarDatos().catch(function(){});
-    } else {
-      mostrarToast("❌ Error: " + res.msg, "error");
-    }
-  });
+  // Actualizar localmente de inmediato
+  var fila = parseInt(datos.fila);
+  if (historialData[fila]) {
+    historialData[fila].numCliente = datos.numCliente;
+    historialData[fila].cliente = datos.cliente;
+    historialData[fila].cantidad = datos.cantidad;
+    historialData[fila].tipo = datos.tipo;
+    historialData[fila].dia = datos.dia;
+  }
+
+  // Guardar en localStorage para sincronización
+  guardarLocalmente("editarMovimiento", datos);
+
+  // Mostrar cambio inmediatamente
+  mostrarToast("✅ Cambios guardados", "ok");
+  setLoading(btn,false);
+  cerrarModal();
+  renderHistorial(historialData);
+  cargarInventario();
+
+  // Intentar sincronizar con Google Sheets
+  setTimeout(function() {
+    sincronizarDatos().catch(function(){});
+  }, 1000);
 }
 
 function setLoading(btn,loading,spinColor){
